@@ -5,36 +5,155 @@
 <script>
 var boxy = boxy || {};
 
+boxy.IDLE_TIME = 40;
+
 boxy.MobileEntity = class {
-  constructor(x, y, size, speed) {
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.speed = speed;
-    this.currentDirection = null;
-    this.nextDirection = null;
-    this.moving = false;
+  constructor(x, y, size, speed, sprite, mapStage) {
+    this._x = x;
+    this._y = y;
+    this._size = size;
+    this._speed = speed;
+    this._sprite = sprite;
+    this._mapStage = mapStage;
+    this._stopTimer = 0;
+    this._idle = false;
   }
 
   set nextDirection(dir) {
-    this.nextDirection = dir;
+    this._nextDirection = dir;
   }
 
   get nextDirection() {
-    return this.nextDirection;
+    return this._nextDirection;
+  }
+
+  get currentDirection() {
+    return this._currentDirection;
+  }
+
+  set currentDirection(dir) {
+    this._currentDirection = dir;
+  }
+
+  get x() {
+    return this._x;
+  }
+
+  set x(x) {
+    this._x = x;
+  }
+
+  get y() {
+    return this._y;
+  }
+
+  set y(y) {
+    this._y = y;
+  }
+
+  get size() {
+    return this._size;
+  }
+
+  get speed() {
+    return this._speed;
+  }
+
+  set speed(speed) {
+    this._speed = speed;
   }
 
   update() {
-    
+    var dirs = this._mapStage.allowedDirections(this);
+
+    // Check that the current direction is still allowed
+    if (this.currentDirection != null && dirs.indexOf(this.currentDirection) == -1) {
+      this.currentDirection = null;
+      this.movementChange = true;
+      this._stopTimer = 0;
+    }
+
+    // Switch to the next direction if possible
+    if (this.nextDirection != null) {
+      if (dirs.indexOf(this.nextDirection) != -1) {
+        this.currentDirection = this.nextDirection;
+        this.nextDirection = null;
+        this.movementChange = true;
+        this._idle = false;
+      }
+    }
+
+    // If not moving, wait a bit then start to idle
+    if (this.currentDirection == null) {
+      this._stopTimer++;
+    }
+    if (this._stopTimer == boxy.IDLE_TIME) {
+      this._idle = true;
+      this._animationChange = true;
+    }
+
+    this.updatePosition();
+    this.updateDisplay();
   }
 
   updatePosition() {
-    if (currentDirection == null) {
+    if (this.currentDirection == null) {
       return;
     }
 
-    if (currentDirection == 0) {
+    switch (this.currentDirection) {
+      case 0:
+        this.y -= this.speed;
+        return;
+      case 1:
+        this.x += this.speed;
+        return;
+      case 2:
+        this.y += this.speed;
+        return;
+      case 3:
+        this.x -= this.speed;
+        return;
+    }
+  }
 
+  updateDisplay() {
+    this._sprite.x = this.x;
+    this._sprite.y = this.y;
+
+    if (this._animationChange) {
+      if (this._idle) {
+        this._sprite.gotoAndPlay("idle");
+      }
+      this._animationChange = false;
+    }
+
+    if (this.movementChange) {
+      var dirName, stopMove;
+      switch (this.currentDirection) {
+        case 0:
+          dirName = "up";
+          break;
+        case 1:
+          dirName = "right";
+          break;
+        case 2:
+          dirName = "down";
+          break;
+        case 3:
+          dirName = "left";
+          break;
+        case null:
+          stopMove = true;
+          break;
+      }
+      if (stopMove) {
+        this._sprite.stop();
+      } else {
+        this._sprite.gotoAndPlay("move_" + dirName);
+      }
+
+      this.movementChange = false;
     }
   }
 }
@@ -45,18 +164,22 @@ boxy.StageMap = class {
     this.h = h;
   }
 
-  possibleDirections(x, y) {
+  allowedDirections(mobileEntity) {
+    var x = mobileEntity.x;
+    var y = mobileEntity.y;
+    var size = mobileEntity.size;
+
     var dirs = [];
     if (x > 0) {
       dirs.push(3);
     }
-    if (x < this.w) {
+    if (x < (this.w - mobileEntity.size)) {
       dirs.push(1);
     }
     if (y > 0) {
       dirs.push(0);
     }
-    if (y < this.h) {
+    if (y < (this.h - mobileEntity.size)) {
       dirs.push(2);
     }
     return dirs;
@@ -64,21 +187,25 @@ boxy.StageMap = class {
 }
 
 boxy.game = (function () {
-  var KEYCODE_DOWN = 36;
+  var KEYCODE_DOWN = 40;
   var KEYCODE_UP = 38;
   var KEYCODE_LEFT = 37;
   var KEYCODE_RIGHT = 39;
   var KEYCODE_W = 87;
   var KEYCODE_A = 65;
   var KEYCODE_D = 68;
+  var KEYCODE_S = 83;
+
+  var KEYCODE_SPACE = 32;
 
   var stage, w, h;
-
   var loader;
 
   var stageMap;
   var mobileEntities;
   var playerEntity;
+
+  document.onkeydown = handleKeyDown;
 
   var game = {};
 
@@ -94,11 +221,7 @@ boxy.game = (function () {
     loader.addEventListener("complete", handleComplete);
     loader.loadManifest(manifest, true, "art/");
 
-    stageMap = new boxy.StageMap();
-    mobileEntities = [];
-    playerEntity = new boxy.MobileEntity(100, 100, 70);
-
-    mobileEntities.push(playerEntity);
+    
   }
 
   function handleComplete() {
@@ -113,7 +236,7 @@ boxy.game = (function () {
     var spriteSheet = new createjs.SpriteSheet({
         framerate: 6,
         "images": [loader.getResult("boxy_sprite")],
-        "frames": {"regX": 0, "height": 70, "count": 16, "regY": 0, "width": 70},
+        "frames": {"regX": 0, "height": 70, "count": 17, "regY": 0, "width": 70},
         // define two animations, run (loops, 1.5x speed) and jump (returns to run):
         "animations": {
           "move_right": {
@@ -131,20 +254,33 @@ boxy.game = (function () {
           "move_up": {
             frames: [12,13,14,15,14,13],
             speed: 2
+          },
+          "idle": {
+            frames: [8,8,8,16],
+            speed: 0.3
           }
         }
       });
-    boxy = new createjs.Sprite(spriteSheet, "move_down");
-    boxy.y = 35;
+    var boxySprite = new createjs.Sprite(spriteSheet, "move_down");
 
-    stage.addChild(background);
-    stage.addChild(background, circle, boxy);
+    stage.addChild(background, circle, boxySprite);
+
+    // Initialize game objects
+    stageMap = new boxy.StageMap(w, h);
+    mobileEntities = [];
+    playerEntity = new boxy.MobileEntity(100, 100, 70, 5, boxySprite, stageMap);
+
+    mobileEntities.push(playerEntity);
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
   }
 
   function tick(event) {
+    mobileEntities.forEach(function(entity) {
+      entity.update();
+    });
+
     stage.update(event);
   }
 
@@ -178,8 +314,6 @@ boxy.game = (function () {
 
   return game;
 })();
-
-console.log(boxy, boxy.game);
 
 function init() {
   boxy.game.init();
