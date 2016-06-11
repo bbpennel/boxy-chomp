@@ -1,0 +1,201 @@
+<html>
+<head>
+<script src="https://code.createjs.com/preloadjs-0.6.2.min.js"></script>
+<script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+<script>
+var boxy = boxy || {};
+
+boxy.MobileEntity = class {
+  constructor(x, y, size, speed) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.speed = speed;
+    this.currentDirection = null;
+    this.nextDirection = null;
+    this.moving = false;
+  }
+
+  set nextDirection(dir) {
+    this.nextDirection = dir;
+  }
+
+  get nextDirection() {
+    return this.nextDirection;
+  }
+
+  update() {
+    
+  }
+
+  updatePosition() {
+    if (currentDirection == null) {
+      return;
+    }
+
+    if (currentDirection == 0) {
+
+    }
+  }
+}
+
+boxy.StageMap = class {
+  constructor(w, h) {
+    this.w = w;
+    this.h = h;
+  }
+
+  possibleDirections(x, y) {
+    var dirs = [];
+    if (x > 0) {
+      dirs.push(3);
+    }
+    if (x < this.w) {
+      dirs.push(1);
+    }
+    if (y > 0) {
+      dirs.push(0);
+    }
+    if (y < this.h) {
+      dirs.push(2);
+    }
+    return dirs;
+  }
+}
+
+boxy.game = (function () {
+  var KEYCODE_DOWN = 36;
+  var KEYCODE_UP = 38;
+  var KEYCODE_LEFT = 37;
+  var KEYCODE_RIGHT = 39;
+  var KEYCODE_W = 87;
+  var KEYCODE_A = 65;
+  var KEYCODE_D = 68;
+
+  var stage, w, h;
+
+  var loader;
+
+  var stageMap;
+  var mobileEntities;
+  var playerEntity;
+
+  var game = {};
+
+  game.init = function() {
+    stage = new createjs.Stage("boxyCanvas");
+    w = stage.canvas.width;
+    h = stage.canvas.height;
+
+    manifest = [
+        {src : "boxy_spritesheet.png", id : "boxy_sprite"}
+    ];
+    loader = new createjs.LoadQueue(false);
+    loader.addEventListener("complete", handleComplete);
+    loader.loadManifest(manifest, true, "art/");
+
+    stageMap = new boxy.StageMap();
+    mobileEntities = [];
+    playerEntity = new boxy.MobileEntity(100, 100, 70);
+
+    mobileEntities.push(playerEntity);
+  }
+
+  function handleComplete() {
+    background = new createjs.Shape();
+    background.graphics.beginFill("#1a3149").drawRect(0, 0, w, h);
+
+    var circle = new createjs.Shape();
+    circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 10);
+    circle.x = 30;
+    circle.y = 30;
+
+    var spriteSheet = new createjs.SpriteSheet({
+        framerate: 6,
+        "images": [loader.getResult("boxy_sprite")],
+        "frames": {"regX": 0, "height": 70, "count": 16, "regY": 0, "width": 70},
+        // define two animations, run (loops, 1.5x speed) and jump (returns to run):
+        "animations": {
+          "move_right": {
+            frames: [0,1,2,3,2,1],
+            speed: 2
+          },
+          "move_left": {
+            frames: [4,5,6,7,6,5],
+            speed: 2
+          },
+          "move_down": {
+            frames: [8,9,10,11,10,9],
+            speed: 2
+          },
+          "move_up": {
+            frames: [12,13,14,15,14,13],
+            speed: 2
+          }
+        }
+      });
+    boxy = new createjs.Sprite(spriteSheet, "move_down");
+    boxy.y = 35;
+
+    stage.addChild(background);
+    stage.addChild(background, circle, boxy);
+
+    createjs.Ticker.timingMode = createjs.Ticker.RAF;
+    createjs.Ticker.addEventListener("tick", tick);
+  }
+
+  function tick(event) {
+    stage.update(event);
+  }
+
+  function handleKeyDown(e) {
+    //cross browser issues exist
+    if (!e) {
+      var e = window.event;
+    }
+    switch (e.keyCode) {
+      case KEYCODE_SPACE:
+        shootHeld = true;
+        return false;
+      case KEYCODE_A:
+      case KEYCODE_LEFT:
+        playerEntity.nextDirection = 3;
+        return false;
+      case KEYCODE_D:
+      case KEYCODE_RIGHT:
+        playerEntity.nextDirection = 1;
+        return false;
+      case KEYCODE_W:
+      case KEYCODE_UP:
+        playerEntity.nextDirection = 0;
+        return false;
+      case KEYCODE_S:
+      case KEYCODE_DOWN:
+        playerEntity.nextDirection = 2;
+        return false;
+    }
+  }
+
+  return game;
+})();
+
+console.log(boxy, boxy.game);
+
+function init() {
+  boxy.game.init();
+}
+</script>
+
+
+</head>
+
+
+<body onload="init();">
+  <canvas id="boxyCanvas" width="500" height="300"></canvas>
+
+
+
+
+</body>
+
+</html>
