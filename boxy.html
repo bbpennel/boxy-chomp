@@ -12,12 +12,42 @@ boxy.defaults = {
   map_file: "test.json"
 };
 
-boxy.MobileEntity = class {
-  constructor(column, row, speed, sprite) {
-    this._cr = [column, row];
+boxy.MapEntity = class {
+  constructor(row, column, sprite) {
+    this._rc = [row, column];
     this._snapToGrid();
-    this._speed = speed;
     this._sprite = sprite;
+  }
+
+  get xy() {
+    return this._x;
+  }
+
+  set xy(xy) {
+    this._xy = xy;
+  }
+
+  get rc() {
+    return this._rc;
+  }
+
+  _snapToGrid() {
+    this._xy = boxy.game.stageMap.gridToCoordinate(this._rc);
+  }
+}
+
+boxy.CollectibleEntity = class extends boxy.MapEntity {
+  constructor(row, column, sprite) {
+    super(row, column, sprite);
+  }
+
+
+}
+
+boxy.MobileEntity = class extends boxy.MapEntity {
+  constructor(row, column, speed, sprite) {
+    super(row, column, sprite);
+    this._speed = speed;
     this._stopTimer = 0;
     this._idle = false;
   }
@@ -41,14 +71,6 @@ boxy.MobileEntity = class {
 
   set currentDirection(dir) {
     this._currentDirection = dir;
-  }
-
-  get xy() {
-    return this._x;
-  }
-
-  set xy(xy) {
-    this._xy = xy;
   }
 
   get speed() {
@@ -86,10 +108,6 @@ boxy.MobileEntity = class {
     this._idle = false;
   }
 
-  _snapToGrid() {
-    this._xy = boxy.game.stageMap.gridToCoordinate(this._cr);
-  }
-
   updatePosition() {
     if (this.currentDirection == null) {
       if (this.nextDirection != null) {
@@ -120,10 +138,10 @@ boxy.MobileEntity = class {
     }
 
     // Grid location has changed
-    if (newGrid[0] != this._cr[0] || newGrid[1] != this._cr[1]) {
+    if (newGrid[0] != this._rc[0] || newGrid[1] != this._rc[1]) {
       if (this.nextDirection != null) {
         // Direct change is queued, try to see if we can change now
-        var dirs = boxy.game.stageMap.allowedDirections(this._cr);
+        var dirs = boxy.game.stageMap.allowedDirections(this._rc);
         if (dirs.indexOf(this.nextDirection) != -1) {
           this._directionChanged();
           this._snapToGrid();
@@ -141,7 +159,7 @@ boxy.MobileEntity = class {
     // Movement continues, update position info
     if (!this.movementChange) {
       this._xy = [newX, newY];
-      this._cr = newGrid;
+      this._rc = newGrid;
     }
   }
 
@@ -184,6 +202,40 @@ boxy.MobileEntity = class {
       this.movementChange = false;
     }
     return this;
+  }
+}
+
+boxy.CollectiblesManager = class {
+  constructor(spawnMap, tiles) {
+    this._spawnMap = spawnMap;
+    this._tiles = tiles;
+    this._entites = [];
+  }
+
+  spawnAll() {
+    for (var i = 0; i < this._spawnMap.length; i++) {
+      var spawnRow = this._spawnMap[i];
+
+      for (var j = 0; j < spawnRow; j++) {
+        var spawn = spawnRow[j];
+
+        if (this._locationSpawnable(i, j)) {
+
+        }
+      }
+    }
+  }
+
+  _locationSpawnable(row, column) {
+    if (this._tiles[row][column] == 1) {
+      return false;
+    }
+    var playerLoc = game.playerEntity.rc;
+    return playerLoc[0] == row && playerLoc[1] == column;
+  }
+
+  spawnEntity(spawnType) {
+
   }
 }
 
@@ -302,10 +354,10 @@ boxy.StageMap = class {
     return this;
   }
 
-  allowedDirections(cr) {
+  allowedDirections(rc) {
     var dirs = [];
     var tiles = this._selectedData.tiles;
-    var column = cr[0], row = cr[1];
+    var column = rc[1], row = rc[0];
 
     if (row > 0 && tiles[row - 1][column] == 0) {
       dirs.push(0);
@@ -324,19 +376,18 @@ boxy.StageMap = class {
     return dirs;
   }
 
-  isBlocked(cr) {
-    console.log(this._selectedData);
-    return this._selectedData.tiles[cr[1]][cr[0]] == 1;
+  isBlocked(rc) {
+    return this._selectedData.tiles[rc[0]][rc[1]] == 1;
   }
 
-  gridToCoordinate(cr) {
-    return [cr[0] * boxy.game.settings.grid_size, cr[1] * boxy.game.settings.grid_size];
+  gridToCoordinate(rc) {
+    return [rc[1] * boxy.game.settings.grid_size, rc[0] * boxy.game.settings.grid_size];
   }
 
   coordinateToGrid(xy) {
     var row = Math.floor(xy[1] / boxy.game.settings.grid_size);
     var column = Math.floor(xy[0] / boxy.game.settings.grid_size);
-    return [column, row];
+    return [row, column];
   }
 }
 
@@ -437,9 +488,9 @@ boxy.game = (function () {
 
     // Initialize game objects
     game.mobileEntities = [];
-    playerEntity = new boxy.MobileEntity(1, 1, 5, boxySprite);
+    game.playerEntity = new boxy.MobileEntity(1, 1, 5, boxySprite);
 
-    game.mobileEntities.push(playerEntity);
+    game.mobileEntities.push(game.playerEntity);
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
@@ -464,19 +515,19 @@ boxy.game = (function () {
         return false;
       case KEYCODE_A:
       case KEYCODE_LEFT:
-        playerEntity.nextDirection = 3;
+        game.playerEntity.nextDirection = 3;
         return false;
       case KEYCODE_D:
       case KEYCODE_RIGHT:
-        playerEntity.nextDirection = 1;
+        game.playerEntity.nextDirection = 1;
         return false;
       case KEYCODE_W:
       case KEYCODE_UP:
-        playerEntity.nextDirection = 0;
+        game.playerEntity.nextDirection = 0;
         return false;
       case KEYCODE_S:
       case KEYCODE_DOWN:
-        playerEntity.nextDirection = 2;
+        game.playerEntity.nextDirection = 2;
         return false;
     }
   }
