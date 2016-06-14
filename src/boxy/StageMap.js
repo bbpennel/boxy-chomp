@@ -1,20 +1,11 @@
 boxy.StageMap = class {
-  constructor(data, spriteImages) {
+  constructor(data, spriteFactory) {
     this._mapData = data;
-
-    this._loadSpritesheet(spriteImages);
+    this._spriteFactory = spriteFactory;
   }
 
   get hasChanged() {
     return this._hasChanged;
-  }
-
-  _loadSpritesheet(spriteImages) {
-    this._spriteSheet = new createjs.SpriteSheet({
-        framerate: 0,
-        "images": [spriteImages],
-        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
-      });
   }
 
   selectMap(mapId) {
@@ -102,7 +93,7 @@ boxy.StageMap = class {
           continue;
         }
 
-        var sprite = new createjs.Sprite(this._spriteSheet, tileValue);
+        var sprite = this._spriteFactory.createMapTileSprite(tileValue);
         sprite.stop();
         sprite.x = j * boxy.game.settings.grid_size;
         sprite.y = offsetY;

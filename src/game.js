@@ -13,6 +13,8 @@ boxy.game = (function () {
   var stage, w, h;
   var loader;
 
+  var spriteFactory;
+  var entityFactory;
   var stageMap;
   var mobileEntities;
   var playerEntity;
@@ -29,7 +31,8 @@ boxy.game = (function () {
 
     manifest = [
         {src : "boxy_spritesheet.png", id : "boxy_sprite"},
-        {src : "map_spritesheet.png", id : "map_sprite"}
+        {src : "map_spritesheet.png", id : "map_sprite"},
+        {src : "collectibles_spritesheet.png", id : "collectibles_sprite"}
     ];
     mapsManifest = [
         {src : "test.json", id : "test_map"},
@@ -44,44 +47,11 @@ boxy.game = (function () {
   function handleComplete(eventx) {
     background = new createjs.Shape();
     background.graphics.beginFill("#1a3149").drawRect(0, 0, game.w, game.h);
+    game.stage.addChild(background);
 
-    var circle = new createjs.Shape();
-    circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 10);
-    circle.x = 30;
-    circle.y = 30;
-
-    var spriteSheet = new createjs.SpriteSheet({
-        framerate: 6,
-        "images": [loader.getResult("boxy_sprite")],
-        "frames": {"regX": 0, "height": game.settings.grid_size, "count": 17, "regY": 0, "width": game.settings.grid_size},
-        // define two animations, run (loops, 1.5x speed) and jump (returns to run):
-        "animations": {
-          "move_right": {
-            frames: [0,1,2,3,2,1],
-            speed: 2
-          },
-          "move_left": {
-            frames: [4,5,6,7,6,5],
-            speed: 2
-          },
-          "move_down": {
-            frames: [8,9,10,11,10,9],
-            speed: 2
-          },
-          "move_up": {
-            frames: [12,13,14,15,14,13],
-            speed: 2
-          },
-          "idle": {
-            frames: [8,8,8,16],
-            speed: 0.3
-          }
-        }
-      });
-
-    var boxySprite = new createjs.Sprite(spriteSheet, "move_down");
-
-    game.stage.addChild(background, circle, boxySprite);
+    spriteFactory = new boxy.SpriteFactory(loader);
+    spriteFactory.init();
+    entityFactory = new boxy.MapEntityFactory(spriteFactory, game.stage);
     
     // Setup map manager
     mapData = {};
@@ -90,12 +60,12 @@ boxy.game = (function () {
         mapData[loaded.item.id] = loaded.result;
       }
     });
-    game.stageMap = new boxy.StageMap(mapData, loader.getResult("map_sprite"));
+    game.stageMap = new boxy.StageMap(mapData, spriteFactory);
     game.stageMap.selectMap("test_map").renderMap();
 
     // Initialize game objects
     game.mobileEntities = [];
-    game.playerEntity = new boxy.MobileEntity(1, 1, 5, boxySprite);
+    game.playerEntity = entityFactory.addBoxy(1, 1, 5);
 
     game.mobileEntities.push(game.playerEntity);
 

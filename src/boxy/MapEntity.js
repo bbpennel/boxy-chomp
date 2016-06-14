@@ -1,8 +1,8 @@
 boxy.MapEntity = class {
-  constructor(row, column, spritesheet) {
+  constructor(row, column, sprite) {
     this._rc = [row, column];
     this._snapToGrid();
-    this._spritesheet = spritesheet;
+    this._sprite = sprite;
   }
 
   get xy() {

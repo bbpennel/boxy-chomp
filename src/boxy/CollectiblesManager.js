@@ -1,14 +1,10 @@
 boxy.CollectiblesManager = class {
-  constructor(spawnMap, tiles, spriteImages) {
+  constructor(spawnMap, tiles, entityFactory) {
     this._spawnMap = spawnMap;
     this._tiles = tiles;
     this._entities = [];
 
-    this._spriteSheet = new createjs.SpriteSheet({
-        framerate: 0,
-        "images": [spriteImages],
-        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
-      });
+    this._entityFactory = entityFactory;
   }
 
   spawnAll() {
