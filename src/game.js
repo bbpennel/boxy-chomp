@@ -15,6 +15,8 @@ boxy.game = (function () {
 
   var spriteFactory;
   var entityFactory;
+  var entityManager;
+  var collectiblesManager;
   var stageMap;
   var mobileEntities;
   var playerEntity;
@@ -51,7 +53,8 @@ boxy.game = (function () {
 
     spriteFactory = new boxy.SpriteFactory(loader);
     spriteFactory.init();
-    entityFactory = new boxy.MapEntityFactory(spriteFactory, game.stage);
+    entityManager = new boxy.MapEntityManager(game.stage);
+    entityFactory = new boxy.MapEntityFactory(entityManager, spriteFactory, game.stage);
     
     // Setup map manager
     mapData = {};
@@ -63,20 +66,25 @@ boxy.game = (function () {
     game.stageMap = new boxy.StageMap(mapData, spriteFactory);
     game.stageMap.selectMap("test_map").renderMap();
 
-    // Initialize game objects
+    // Initialize the event handler
+    game.eventHandler = new boxy.EventHandler(entityManager);
+
+    // Initialize mobile game objects
     game.mobileEntities = [];
     game.playerEntity = entityFactory.addBoxy(1, 1, 5);
 
     game.mobileEntities.push(game.playerEntity);
+
+    // initialize collectible items
+    collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
+    collectiblesManager.spawnAll();
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
   }
 
   function tick(event) {
-    game.mobileEntities.forEach(function(entity) {
-      entity.update();
-    });
+    entityManager.update();
 
     game.stage.update(event);
   }
@@ -108,6 +116,8 @@ boxy.game = (function () {
         return false;
     }
   }
+
+  game.trigger
 
   return game;
 })();
