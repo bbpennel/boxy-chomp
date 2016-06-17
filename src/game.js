@@ -27,7 +27,7 @@ boxy.game = (function () {
   game.settings = boxy.defaults;
 
   game.init = function() {
-    this.stage = new createjs.Stage("boxyCanvas");
+    this.stage = new createjs.Stage("boxyCanvas", false, false);
     this.w = this.stage.canvas.width;
     this.h = this.stage.canvas.height;
 
@@ -51,7 +51,7 @@ boxy.game = (function () {
     background.graphics.beginFill("#1a3149").drawRect(0, 0, game.w, game.h);
     game.stage.addChild(background);
 
-    spriteFactory = new boxy.SpriteFactory(loader);
+    spriteFactory = new boxy.SpriteFactory(loader, game.stage);
     spriteFactory.init();
     entityManager = new boxy.MapEntityManager(game.stage);
     entityFactory = new boxy.MapEntityFactory(entityManager, spriteFactory, game.stage);

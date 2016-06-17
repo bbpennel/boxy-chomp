@@ -1,6 +1,7 @@
 boxy.SpriteFactory = class {
-  constructor(loader) {
+  constructor(loader, stage) {
     this._loader = loader;
+    this._stage = stage;
   }
 
   init() {
@@ -37,29 +38,43 @@ boxy.SpriteFactory = class {
           }
         }
       });
+    this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
 
   	this._mapTilesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("map_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
       });
+    this._mapTilesContainer = new createjs.SpriteContainer(this._mapTilesSheet);
 
   	this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("collectibles_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
       });
+    this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
+
+    // Add containers to the stage in render order
+    this._stage.addChild(this._mapTilesContainer, this._collectiblesContainer, this._boxyContainer);
   }
 
   createBoxySprite() {
-  	return new createjs.Sprite(this._boxySheet, "move_down");
+    var sprite = new createjs.Sprite(this._boxySheet, "move_down");
+    this._boxyContainer.addChild(sprite);
+  	return sprite;
   }
 
   createMapTileSprite(tileValue) {
-  	return new createjs.Sprite(this._mapTilesSheet, tileValue);
+    var sprite = new createjs.Sprite(this._mapTilesSheet, tileValue);
+    this._mapTilesContainer.addChild(sprite);
+    sprite.stop();
+  	return sprite;
   }
 
   createFolderSprite(color) {
-  	return new createjs.Sprite(this._collectiblesSheet, 0);
+    var sprite = new createjs.Sprite(this._collectiblesSheet, color);
+    this._collectiblesContainer.addChild(sprite);
+    sprite.stop();
+  	return sprite;
   }
 }

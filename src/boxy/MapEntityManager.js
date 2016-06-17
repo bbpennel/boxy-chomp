@@ -36,7 +36,7 @@ boxy.MapEntityManager = class {
     var eIndex = this._entities.indexOf(entity);
     var mIndex = this._mobileEntities.indexOf(entity);
 
-    this._stage.removeChild(entity.sprite);
+    entity.sprite.parent.removeChild(entity.sprite);
 
     if (eIndex != -1) {
       this._entities.splice(eIndex, 1);

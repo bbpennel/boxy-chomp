@@ -7,7 +7,6 @@ boxy.MapEntityFactory = class {
 
   addBoxy(row, column, speed) {
     var sprite = this._spriteFactory.createBoxySprite();
-    this._stage.addChild(sprite);
     var entity = new boxy.MobileEntity(row, column, speed, sprite);
     this._entityManager.register(entity);
     entity.collisionRadiusRatio = 0.9;
@@ -16,8 +15,6 @@ boxy.MapEntityFactory = class {
 
   addFolder(row, column, color) {
     var sprite = this._spriteFactory.createFolderSprite(color);
-    sprite.stop();
-    this._stage.addChild(sprite);
     var entity = new boxy.CollectibleEntity(row, column, 0, sprite);
     entity.collisionRadiusRatio = 0.1;
     this._entityManager.register(entity);
