@@ -1,3 +1,23 @@
+boxy.defaults = {
+  idle_time: 40,
+  grid_size: 70,
+  map_file: "test.json",
+  initial_capacity: 10000,
+  map_offset_y : 60,
+  map_offset_x : 5,
+  bonus : {
+    folder : {
+      score : 5,
+      disk : 1
+    },
+    hard_drive : {
+      score : 5,
+      disk : 0,
+      capacity : 20000
+    }
+  }
+};
+
 boxy.game = (function () {
   var KEYCODE_DOWN = 40;
   var KEYCODE_UP = 38;
@@ -15,9 +35,14 @@ boxy.game = (function () {
 
   var spriteFactory;
   var entityFactory;
+  
   var entityManager;
   var collectiblesManager;
+  
+  var gameHud;
+
   var stageMap;
+
   var mobileEntities;
   var playerEntity;
 
@@ -25,6 +50,16 @@ boxy.game = (function () {
 
   var game = {};
   game.settings = boxy.defaults;
+
+  game.stats = {
+    level : 0,
+    score : 0,
+    bonus : 0,
+    numberOfFiles : 0,
+    numberOfFolders : 0,
+    diskUsage : 0,
+    diskCapacity : game.settings.initial_capacity
+  };
 
   game.init = function() {
     this.stage = new createjs.Stage("boxyCanvas", false, false);
@@ -34,7 +69,8 @@ boxy.game = (function () {
     manifest = [
         {src : "boxy_spritesheet.png", id : "boxy_sprite"},
         {src : "map_spritesheet.png", id : "map_sprite"},
-        {src : "collectibles_spritesheet.png", id : "collectibles_sprite"}
+        {src : "collectibles_spritesheet.png", id : "collectibles_sprite"},
+        {src : "slkscr.ttf", id : "font_ttf"}
     ];
     mapsManifest = [
         {src : "test.json", id : "test_map"},
@@ -63,7 +99,8 @@ boxy.game = (function () {
         mapData[loaded.item.id] = loaded.result;
       }
     });
-    game.stageMap = new boxy.StageMap(mapData, spriteFactory);
+    game.stageMap = new boxy.StageMap(mapData, spriteFactory, game.settings.grid_size,
+      game.settings.map_offset_x, game.settings.map_offset_y);
     game.stageMap.selectMap("test_map").renderMap();
 
     // Initialize the event handler
@@ -79,12 +116,17 @@ boxy.game = (function () {
     collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
     collectiblesManager.spawnAll();
 
+    gameHud = new boxy.GameHud(spriteFactory);
+    gameHud.draw();
+
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
   }
 
   function tick(event) {
     entityManager.update();
+
+    gameHud.update();
 
     game.stage.update(event);
   }
@@ -116,8 +158,6 @@ boxy.game = (function () {
         return false;
     }
   }
-
-  game.trigger
 
   return game;
 })();

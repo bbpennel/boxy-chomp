@@ -5,15 +5,15 @@ boxy.SpriteFactory = class {
   }
 
   init() {
-  	this._generateSpritesheets();
+    this._generateSpritesheets();
   }
 
   _generateSpritesheets() {
-  	this._boxySheet = new createjs.SpriteSheet({
+    this._boxySheet = new createjs.SpriteSheet({
         framerate: 6,
         "images": [this._loader.getResult("boxy_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 17, 
-        	"regY": 0, "width": boxy.game.settings.grid_size},
+          "regY": 0, "width": boxy.game.settings.grid_size},
         // define two animations, run (loops, 1.5x speed) and jump (returns to run):
         "animations": {
           "move_right": {
@@ -40,41 +40,51 @@ boxy.SpriteFactory = class {
       });
     this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
 
-  	this._mapTilesSheet = new createjs.SpriteSheet({
+    this._mapTilesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("map_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
       });
     this._mapTilesContainer = new createjs.SpriteContainer(this._mapTilesSheet);
 
-  	this._collectiblesSheet = new createjs.SpriteSheet({
+    this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("collectibles_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
       });
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
 
+    this._textContainer = new createjs.Container();
+
     // Add containers to the stage in render order
-    this._stage.addChild(this._mapTilesContainer, this._collectiblesContainer, this._boxyContainer);
+    this._stage.addChild(this._mapTilesContainer, this._textContainer,
+      this._collectiblesContainer, this._boxyContainer);
   }
 
   createBoxySprite() {
     var sprite = new createjs.Sprite(this._boxySheet, "move_down");
     this._boxyContainer.addChild(sprite);
-  	return sprite;
+    return sprite;
   }
 
   createMapTileSprite(tileValue) {
     var sprite = new createjs.Sprite(this._mapTilesSheet, tileValue);
     this._mapTilesContainer.addChild(sprite);
     sprite.stop();
-  	return sprite;
+    return sprite;
   }
 
   createFolderSprite(color) {
     var sprite = new createjs.Sprite(this._collectiblesSheet, color);
     this._collectiblesContainer.addChild(sprite);
     sprite.stop();
-  	return sprite;
+    return sprite;
+  }
+
+  createText(value) {
+    var text = new createjs.Text(value, "48px silkscreen", "#FFFFFF");
+    text.textBaseline = "alphabetic";
+    this._textContainer.addChild(text);
+    return text;
   }
 }

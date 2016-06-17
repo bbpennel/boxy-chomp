@@ -9,7 +9,7 @@ module.exports = function(grunt) {
         src: ["src/module.js", "src/boxy/MapEntity.js", "src/boxy/CollectibleEntity.js", 
           "src/boxy/CollectiblesManager.js", "src/boxy/MobileEntity.js", "src/boxy/StageMap.js",
           "src/boxy/SpriteFactory.js", "src/boxy/MapEntityFactory.js", "src/boxy/MapEntityManager.js",
-          "src/boxy/EventHandler.js", "src/game.js"],
+          "src/boxy/EventHandler.js", "src/boxy/GameHud.js", "src/game.js"],
         dest: "dist/boxy.js"
       }
     },

@@ -1,7 +1,11 @@
 boxy.StageMap = class {
-  constructor(data, spriteFactory) {
+  constructor(data, spriteFactory, gridSize, offsetX, offsetY) {
     this._mapData = data;
     this._spriteFactory = spriteFactory;
+    this._gridSize = gridSize;
+    this._offsetX = offsetX;
+    this._offsetY = offsetY;
+    this._tileSprites = [];
   }
 
   get hasChanged() {
@@ -89,7 +93,7 @@ boxy.StageMap = class {
 
     for (var i = 0; i < grid.length; i++) {
       var row = grid[i];
-      var offsetY = i * boxy.game.settings.grid_size;
+      var offsetY = i * this._gridSize;
 
       for (var j = 0; j < row.length; j++) {
         var tileValue = row[j];
@@ -99,10 +103,9 @@ boxy.StageMap = class {
         }
 
         var sprite = this._spriteFactory.createMapTileSprite(tileValue);
-        sprite.stop();
-        sprite.x = j * boxy.game.settings.grid_size;
-        sprite.y = offsetY;
-        boxy.game.stage.addChild(sprite);
+        sprite.x = j * this._gridSize + this._offsetX;
+        sprite.y = offsetY + this._offsetY;
+        this._tileSprites.push(sprite);
       }
     }
 
@@ -136,12 +139,13 @@ boxy.StageMap = class {
   }
 
   gridToCoordinate(rc) {
-    return [rc[1] * boxy.game.settings.grid_size, rc[0] * boxy.game.settings.grid_size];
+    return [rc[1] * this._gridSize + this._offsetX,
+      rc[0] * this._gridSize + this._offsetY];
   }
 
   coordinateToGrid(xy) {
-    var row = Math.floor(xy[1] / boxy.game.settings.grid_size);
-    var column = Math.floor(xy[0] / boxy.game.settings.grid_size);
+    var row = Math.floor((xy[1] - this._offsetY) / this._gridSize);
+    var column = Math.floor((xy[0] - this._offsetX) / this._gridSize);
     return [row, column];
   }
 }

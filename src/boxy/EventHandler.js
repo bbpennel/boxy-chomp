@@ -11,9 +11,21 @@ boxy.EventHandler = class {
       if (collidee instanceof boxy.CollectibleEntity) {
         if (collidee.itemType == 0) {
           this._entityManager.destroy(collidee);
-          console.log("Ate a folder!!!!");
+          this._adjustStats(boxy.game.settings.bonus.folder);
         }
       }
+    }
+  }
+
+  _adjustStats(stats) {
+    if (stats.score) {
+      boxy.game.stats.score += stats.score;
+    }
+    if (stats.disk) {
+      boxy.game.stats.diskUsage += stats.disk;
+    }
+    if (stats.capacity) {
+      boxy.game.stats.diskCapacity += stats.capacity;
     }
   }
 }
