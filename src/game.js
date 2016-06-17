@@ -68,6 +68,7 @@ boxy.game = (function () {
 
     manifest = [
         {src : "boxy_spritesheet.png", id : "boxy_sprite"},
+        {src : "ghost_spritesheet.png", id : "ghost_sprite"},
         {src : "map_spritesheet.png", id : "map_sprite"},
         {src : "collectibles_spritesheet.png", id : "collectibles_sprite"},
         {src : "slkscr.ttf", id : "font_ttf"}
@@ -109,6 +110,7 @@ boxy.game = (function () {
     // Initialize mobile game objects
     game.mobileEntities = [];
     game.playerEntity = entityFactory.addBoxy(1, 1, 5);
+    entityFactory.addGhost(1, 10, 0);
 
     game.mobileEntities.push(game.playerEntity);
 

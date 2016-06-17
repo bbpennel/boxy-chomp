@@ -20,4 +20,17 @@ boxy.MapEntityFactory = class {
     this._entityManager.register(entity);
     return entity;
   }
+  
+  addGhost(row, column, type) {
+    var sprite = this._spriteFactory.createGhostSprite();
+    var speed = 5;
+    var prefix;
+    if (type == 0) {
+      prefix = "i_";
+    }
+    var entity = new boxy.GhostEntity(row, column, speed, sprite, prefix);
+    this._entityManager.register(entity);
+    entity.collisionRadiusRatio = 0.9;
+    return entity;
+  }
 }

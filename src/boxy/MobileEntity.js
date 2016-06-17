@@ -1,9 +1,11 @@
 boxy.MobileEntity = class extends boxy.MapEntity {
-  constructor(row, column, speed, sprite) {
+  constructor(row, column, speed, sprite, spritePrefix) {
     super(row, column, sprite);
     this._speed = speed;
     this._stopTimer = 0;
     this._idle = false;
+    this._spritePrefix = spritePrefix || "";
+    this._positionChanged = true;
   }
 
   set nextDirection(dir) {
@@ -115,6 +117,9 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       this._xy = [newX, newY];
       this._rc = newGrid;
     }
+    
+    this._positionChanged = newGrid[0] != this._rc[0] || newGrid[1] != this._rc[1];
+    console.log(this._positionChanged);
   }
 
   updateDisplay() {
@@ -123,7 +128,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
 
     if (this._animationChange) {
       if (this._idle) {
-        this._sprite.gotoAndPlay("idle");
+        this._sprite.gotoAndPlay(this._spritePrefix + "idle");
       }
       this._animationChange = false;
     }
@@ -150,7 +155,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       if (stopMove) {
         this._sprite.stop();
       } else {
-        this._sprite.gotoAndPlay("move_" + dirName);
+        this._sprite.gotoAndPlay(this._spritePrefix + "move_" + dirName);
       }
 
       this.movementChange = false;

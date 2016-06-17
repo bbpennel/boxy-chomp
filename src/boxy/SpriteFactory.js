@@ -39,6 +39,37 @@ boxy.SpriteFactory = class {
         }
       });
     this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
+    
+    this._ghostSheet = new createjs.SpriteSheet({
+        framerate: 2,
+        "images": [this._loader.getResult("ghost_sprite")],
+        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 5, 
+          "regY": 0, "width": boxy.game.settings.grid_size},
+        // define two animations, run (loops, 1.5x speed) and jump (returns to run):
+        "animations": {
+          "i_move_right": {
+            frames: [3],
+            speed: 2
+          },
+          "i_move_left": {
+            frames: [2],
+            speed: 2
+          },
+          "i_move_down": {
+            frames: [0],
+            speed: 2
+          },
+          "i_move_up": {
+            frames: [1],
+            speed: 2
+          },
+          "i_idle": {
+            frames: [0],
+            speed: 0.3
+          }
+        }
+      });
+    this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
 
     this._mapTilesSheet = new createjs.SpriteSheet({
         framerate: 0,
@@ -58,12 +89,19 @@ boxy.SpriteFactory = class {
 
     // Add containers to the stage in render order
     this._stage.addChild(this._mapTilesContainer, this._textContainer,
-      this._collectiblesContainer, this._boxyContainer);
+      this._collectiblesContainer, this._ghostContainer, this._boxyContainer);
   }
 
   createBoxySprite() {
     var sprite = new createjs.Sprite(this._boxySheet, "move_down");
     this._boxyContainer.addChild(sprite);
+    return sprite;
+  }
+  
+  createGhostSprite() {
+    var sprite = new createjs.Sprite(this._ghostSheet);
+    this._ghostContainer.addChild(sprite);
+    sprite.stop();
     return sprite;
   }
 
