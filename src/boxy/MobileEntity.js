@@ -49,77 +49,86 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       this._idle = true;
       this._animationChange = true;
     }
+
+    this._clearMovementFlags();
   }
 
-  movementStopped() {
-    this.currentDirection = null;
-    this.movementChange = true;
+  _movementStopped() {
+    this._currentDirection = null;
+    this._nextDirection = null;
+    this._movementChange = true;
     this._stopTimer = 0;
+    this._nextDirection = null;
+    this._directionChanged = false;
   }
 
-  _directionChanged() {
-    this.currentDirection = this.nextDirection;
-    this.nextDirection = null;
-    this.movementChange = true;
+  _changeDirection(direction) {
+    this.currentDirection = this._nextDirection;
+    this._nextDirection = null;
+    this._movementChange = true;
     this._idle = false;
+    this._directionChanged = true;
+  }
+
+  _clearMovementFlags() {
+    this._positionChanged = false;
+    this._movementChange = false;
   }
 
   updatePosition() {
-    if (this.currentDirection == null) {
-      if (this.nextDirection != null) {
-        this._directionChanged();
-      }
-      return this;
-    }
     var newX = this._xy[0], newY = this._xy[1];
-    var newGrid;
+    var newGrid = this._rc;
 
-    switch (this.currentDirection) {
-      case 0:
-        newY -= this.speed;
-        newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
-        break;
-      case 1:
-        newX += this.speed;
-        newGrid = boxy.game.stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
-        break;
-      case 2:
-        newY += this.speed;
-        newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
-        break;
-      case 3:
-        newX -= this.speed;
-        newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
-        break;
+    if (this._currentDirection != null) {
+      switch (this.currentDirection) {
+        case 0:
+          newY -= this.speed;
+          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
+          break;
+        case 1:
+          newX += this.speed;
+          newGrid = boxy.game.stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
+          break;
+        case 2:
+          newY += this.speed;
+          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
+          break;
+        case 3:
+          newX -= this.speed;
+          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
+          break;
+      }
+
+      this._positionChanged = newGrid[0] != this._rc[0] || newGrid[1] != this._rc[1];
     }
 
-    // Grid location has changed
-    if (newGrid[0] != this._rc[0] || newGrid[1] != this._rc[1]) {
-      if (this.nextDirection != null) {
-        // Direct change is queued, try to see if we can change now
-        var dirs = boxy.game.stageMap.allowedDirections(this._rc);
-        if (dirs.indexOf(this.nextDirection) != -1) {
-          this._directionChanged();
+    if (!this._directionChanged && (this._positionChanged || this._currentDirection == null)) {
+      // Retrieve or compute the next direction if one is provided
+      var nextDirection = this.nextDirection;
+
+      var dirs = boxy.game.stageMap.allowedDirections(this._rc);
+      if (nextDirection != null) {
+        // make sure that the selected direction is allowed
+        if (dirs.indexOf(nextDirection) != -1) {
           this._snapToGrid();
+          this._changeDirection(nextDirection);
+          return;
         }
       }
-
-      // Check to see if the new grid location would be a barrier
-      if (!this.movementChange && boxy.game.stageMap.isBlocked(newGrid)) {
-        // hit a wall, no new directions, so stop and snap to position
-        this.movementStopped();
+      // Can't go any further in the selected direction, and no further direction given
+      if (this._currentDirection != null && dirs.indexOf(this._currentDirection) == -1) {
         this._snapToGrid();
+        this._movementStopped();
+        return;
       }
     }
 
-    // Movement continues, update position info
-    if (!this.movementChange) {
-      this._xy = [newX, newY];
-      this._rc = newGrid;
-    }
-    
-    this._positionChanged = newGrid[0] != this._rc[0] || newGrid[1] != this._rc[1];
-    console.log(this._positionChanged);
+    // Continue movement in the current direction
+    this._xy = [newX, newY];
+    this._rc = newGrid;
+    this._directionChanged = false;
+
+    return;
   }
 
   updateDisplay() {
@@ -133,7 +142,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       this._animationChange = false;
     }
 
-    if (this.movementChange) {
+    if (this._movementChange) {
       var dirName, stopMove;
       switch (this.currentDirection) {
         case 0:
@@ -157,8 +166,6 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       } else {
         this._sprite.gotoAndPlay(this._spritePrefix + "move_" + dirName);
       }
-
-      this.movementChange = false;
     }
     return this;
   }
