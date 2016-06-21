@@ -2,6 +2,10 @@ boxy.EventHandler = class {
   constructor(entityManager) {
     this._entityManager = entityManager;
   }
+  
+  set levelState(levelState) {
+    this._levelState = levelState;
+  }
 
   collisionEvent(data) {
     var collider = data.collider;
@@ -9,9 +13,20 @@ boxy.EventHandler = class {
 
     if (collider === boxy.game.playerEntity) {
       if (collidee instanceof boxy.CollectibleEntity) {
-        if (collidee.itemType == 0) {
+        switch (collidee.itemType) {
+        case "folder" :
           this._entityManager.destroy(collidee);
           this._adjustStats(boxy.game.settings.bonus.folder);
+          break;
+        case "collection" :
+          this._entityManager.destroy(collidee);
+          this._adjustStats(boxy.game.settings.bonus.collection);
+          this._levelState.registerCollection(collidee);
+          break;
+        case "disk" :
+          this._entityManager.destroy(collidee);
+          this._adjustStats(boxy.game.settings.bonus.collection);
+          break;
         }
       }
     }

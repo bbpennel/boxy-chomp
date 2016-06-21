@@ -16,12 +16,17 @@ boxy.StageMap = class {
     return this._spawnMap;
   }
 
+  get spawnInfo() {
+    return this._spawnInfo;
+  }
+
   selectMap(mapId) {
     this._selectedId = mapId;
     this._selectedData = this._mapData[mapId];
     this._numRows = this._selectedData.tiles.length;
     this._numColumns = this._selectedData.tiles[0].length;
     this._spawnMap = this._selectedData.spawns;
+    this._spawnInfo = this._selectedData.spawnInfo;
 
     this._computeMap();
     return this;

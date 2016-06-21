@@ -81,7 +81,24 @@ boxy.SpriteFactory = class {
     this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("collectibles_sprite")],
-        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
+        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 7, "regY": 0, "width": boxy.game.settings.grid_size},
+        "animations": {
+          "folder": {
+            frames: [0]
+          },
+          "collection_text_blue": {
+            frames: [1]
+          },
+          "collection_image_blue": {
+            frames: [2]
+          },
+          "collection_audio_blue": {
+            frames: [3]
+          },
+          "disk": {
+            frames: [6]
+          }
+        }
       });
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
 
@@ -93,29 +110,47 @@ boxy.SpriteFactory = class {
   }
 
   createBoxySprite() {
-    var sprite = new createjs.Sprite(this._boxySheet, "move_down");
-    this._boxyContainer.addChild(sprite);
-    return sprite;
+    return this._createSprite(this._boxySheet, this._boxyContainer, "idle");
   }
   
   createGhostSprite() {
-    var sprite = new createjs.Sprite(this._ghostSheet);
-    this._ghostContainer.addChild(sprite);
-    sprite.stop();
-    return sprite;
+    return this._createSprite(this._ghostSheet, this._ghostContainer, 0);
   }
 
   createMapTileSprite(tileValue) {
-    var sprite = new createjs.Sprite(this._mapTilesSheet, tileValue);
-    this._mapTilesContainer.addChild(sprite);
-    sprite.stop();
-    return sprite;
+    return this._createSprite(this._mapTilesSheet, this._mapTilesContainer, tileValue, true);
   }
 
-  createFolderSprite(color) {
-    var sprite = new createjs.Sprite(this._collectiblesSheet, color);
-    this._collectiblesContainer.addChild(sprite);
-    sprite.stop();
+  createFolderSprite(category, color) {
+    return this._createCollectibleSprite("folder", category, color);
+  }
+  
+  createCollectionSprite(category, color) {
+    return this._createCollectibleSprite("collection", category, color);
+  }
+
+  createDiskSprite(category, color) {
+    return this._createCollectibleSprite("disk");
+  }
+  
+  _createCollectibleSprite(itemType, category, color) {
+    var animation = itemType;
+    if (category != null) {
+      animation += "_" + category;
+    }
+    if (color != null) {
+      animation += "_" + color;
+    }
+    
+    return this._createSprite(this._collectiblesSheet, this._collectiblesContainer, animation, true);
+  }
+  
+  _createSprite(spritesheet, container, animation, stopAnimation) {
+    var sprite = new createjs.Sprite(spritesheet, animation);
+    container.addChild(sprite);
+    if (stopAnimation) {
+      sprite.stop();
+    }
     return sprite;
   }
 

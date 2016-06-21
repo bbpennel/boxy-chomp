@@ -13,19 +13,27 @@ boxy.MapEntityFactory = class {
     return entity;
   }
 
-  addFolder(row, column, color) {
-    var sprite = this._spriteFactory.createFolderSprite(color);
-    var entity = new boxy.CollectibleEntity(row, column, 0, sprite);
+  addFolder(row, column, format, color) {
+    var sprite = this._spriteFactory.createFolderSprite(format, color);
+    var entity = new boxy.CollectibleEntity(row, column, "folder", format, color, sprite);
     entity.collisionRadiusRatio = 0.1;
     this._entityManager.register(entity);
     return entity;
   }
+
+  addCollection(row, column, format, color) {
+    var sprite = this._spriteFactory.createCollectionSprite(format, color);
+    var entity = new boxy.CollectibleEntity(row, column, "collection", format, color, sprite);
+    entity.collisionRadiusRatio = 0.6;
+    this._entityManager.register(entity);
+    return entity;
+  }
   
-  addGhost(row, column, type) {
+  addGhost(row, column, ghostIdentity) {
     var sprite = this._spriteFactory.createGhostSprite();
     var speed = 5;
     var prefix;
-    if (type == 0) {
+    if (ghostIdentity == 0) {
       prefix = "i_";
     }
     var entity = new boxy.GhostEntity(row, column, speed, sprite, prefix);

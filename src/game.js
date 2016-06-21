@@ -10,7 +10,11 @@ boxy.defaults = {
       score : 5,
       disk : 1
     },
-    hard_drive : {
+    collection : {
+      score : 100,
+      disk : 1
+    },
+    disk : {
       score : 5,
       disk : 0,
       capacity : 20000
@@ -42,6 +46,7 @@ boxy.game = (function () {
   var gameHud;
 
   var stageMap;
+  var levelState;
 
   var mobileEntities;
   var playerEntity;
@@ -74,8 +79,7 @@ boxy.game = (function () {
         {src : "slkscr.ttf", id : "font_ttf"}
     ];
     mapsManifest = [
-        {src : "test.json", id : "test_map"},
-        {src : "test.json", id : "map2"}
+      {src : "test.json", id : "test_map"}
     ];
     loader = new createjs.LoadQueue(false);
     loader.addEventListener("complete", handleComplete);
@@ -103,9 +107,12 @@ boxy.game = (function () {
     game.stageMap = new boxy.StageMap(mapData, spriteFactory, game.settings.grid_size,
       game.settings.map_offset_x, game.settings.map_offset_y);
     game.stageMap.selectMap("test_map").renderMap();
+    
+    levelState = new boxy.LevelState();
 
     // Initialize the event handler
     game.eventHandler = new boxy.EventHandler(entityManager);
+    game.eventHandler.levelState = levelState;
 
     // Initialize mobile game objects
     game.mobileEntities = [];
