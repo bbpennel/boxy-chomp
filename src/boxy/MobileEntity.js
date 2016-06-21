@@ -80,21 +80,22 @@ boxy.MobileEntity = class extends boxy.MapEntity {
     var newGrid = this._rc;
 
     if (this._currentDirection != null) {
+      var speed = boxy.calculateMoveDelta(this.speed);
       switch (this.currentDirection) {
         case 0:
-          newY -= this.speed;
+          newY -= speed;
           newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
           break;
         case 1:
-          newX += this.speed;
+          newX += speed;
           newGrid = boxy.game.stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
           break;
         case 2:
-          newY += this.speed;
+          newY += speed;
           newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
           break;
         case 3:
-          newX -= this.speed;
+          newX -= speed;
           newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
           break;
       }

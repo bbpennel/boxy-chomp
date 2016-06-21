@@ -39,7 +39,7 @@ boxy.MapEntityFactory = class {
   
   addGhost(row, column, ghostIdentity) {
     var sprite = this._spriteFactory.createGhostSprite();
-    var speed = 5;
+    var speed = 200;
     var prefix;
     if (ghostIdentity == 0) {
       prefix = "i_";

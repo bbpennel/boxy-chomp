@@ -116,7 +116,7 @@ boxy.game = (function () {
 
     // Initialize mobile game objects
     game.mobileEntities = [];
-    game.playerEntity = entityFactory.addBoxy(1, 1, 5);
+    game.playerEntity = entityFactory.addBoxy(1, 1, 250);
     entityFactory.addGhost(1, 10, 0);
 
     game.mobileEntities.push(game.playerEntity);
@@ -133,6 +133,8 @@ boxy.game = (function () {
   }
 
   function tick(event) {
+    game.tick = event;
+    
     entityManager.update();
 
     gameHud.update();

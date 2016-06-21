@@ -7,3 +7,7 @@ boxy.indexOfPair = function(array, pair) {
   }
   return -1;
 }
+
+boxy.calculateMoveDelta = function(speed) {
+  return boxy.game.tick.delta / 1000 * speed;
+}
