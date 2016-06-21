@@ -8,6 +8,7 @@ boxy.CollectiblesManager = class {
 
   spawnAll() {
     this._collectionLocations = this._determineStartingLocations(boxy.COLLECTION_ID, this._spawnInfo.collectionStart);
+    this._diskLocations = this._determineStartingLocations(boxy.DISK_ID, 1);//this._spawnInfo.diskStart);
 
     for (var i = 0; i < this._spawnMap.length; i++) {
       var spawnRow = this._spawnMap[i];
@@ -65,6 +66,12 @@ boxy.CollectiblesManager = class {
       case boxy.COLLECTION_ID:
         if (boxy.indexOfPair(this._collectionLocations, [row, column]) != -1) {
           return this._entityFactory.addCollection(row, column, "text", "blue");
+        } else {
+          return this._entityFactory.addFolder(row, column);
+        }
+      case boxy.DISK_ID:
+        if (boxy.indexOfPair(this._diskLocations, [row, column]) != -1) {
+          return this._entityFactory.addDisk(row, column);
         } else {
           return this._entityFactory.addFolder(row, column);
         }

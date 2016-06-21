@@ -15,7 +15,7 @@ boxy.defaults = {
       disk : 1
     },
     disk : {
-      score : 5,
+      score : 20,
       disk : 0,
       capacity : 20000
     }

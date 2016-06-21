@@ -29,6 +29,14 @@ boxy.MapEntityFactory = class {
     return entity;
   }
   
+  addDisk(row, column) {
+    var sprite = this._spriteFactory.createDiskSprite();
+    var entity = new boxy.CollectibleEntity(row, column, "disk", null, null, sprite);
+    entity.collisionRadiusRatio = 0.7;
+    this._entityManager.register(entity);
+    return entity;
+  }
+  
   addGhost(row, column, ghostIdentity) {
     var sprite = this._spriteFactory.createGhostSprite();
     var speed = 5;

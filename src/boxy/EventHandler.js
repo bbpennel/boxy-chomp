@@ -25,7 +25,7 @@ boxy.EventHandler = class {
           break;
         case "disk" :
           this._entityManager.destroy(collidee);
-          this._adjustStats(boxy.game.settings.bonus.collection);
+          this._adjustStats(boxy.game.settings.bonus.disk);
           break;
         }
       }
