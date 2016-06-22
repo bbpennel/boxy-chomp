@@ -10,3 +10,21 @@ boxy.DISK_ID = 3;
 boxy.RANDOM_BONUS_ID = 4;
 
 boxy.COLLECTIBLE_NAMES = ["none", "folder", "collection", "disk", "bonus"];
+
+boxy.DIFFICULTY_LEVELS = {
+  0 : {
+    damageCost : 3,
+    invincibleDuration : 4000,
+    freezeDuration : 500
+  },
+  1 : {
+    damageCost : 5,
+    invincibleDuration: 4000,
+    freezeDuration : 500
+  },
+  2 : {
+    damageCost : 10,
+    invincibleDuration: 2000,
+    freezeDuration : 800
+  }
+};

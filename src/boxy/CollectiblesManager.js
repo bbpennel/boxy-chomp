@@ -4,6 +4,7 @@ boxy.CollectiblesManager = class {
     this._spawnInfo = stageMap.spawnInfo;
     this._stageMap = stageMap;
     this._entityFactory = entityFactory;
+    this._consumedQueue = [];
     this._respawnQueue = [];
     this._typeCountTotal = [];
     this._typeCountCurrent = [];
@@ -46,8 +47,22 @@ boxy.CollectiblesManager = class {
     }
   }
   
+  ejectConsumed(count) {
+    var length = this._consumedQueue.length;
+    if (length < count) {
+      return this._consumedQueue.splice(0, length);
+    }
+    
+    return this._consumedQueue.splice(length - count, count);
+  }
+  
+  consume(collectible) {
+    this._consumedQueue.push(collectible);
+    this._markForRespawn(collectible.rc);
+  }
+  
   // Register that the collectible at the given location has been removed, and queue it for respawn
-  markForRespawn(rc) {
+  _markForRespawn(rc) {
     var spawnType = this._spawnMap[rc[0]][rc[1]];
     var typeName = boxy.COLLECTIBLE_NAMES[spawnType];
     var typeInfo = boxy.game.settings.collectibles[typeName];

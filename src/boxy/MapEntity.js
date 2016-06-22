@@ -29,6 +29,14 @@ boxy.MapEntity = class {
   get sprite() {
     return this._sprite;
   }
+  
+  set invincibleTime(time) {
+    this._invincibleTime = time;
+  }
+  
+  get isInvincible() {
+    return this._invincibleTime != null && this._invincibleTime > 0;
+  }
 
   center() {
     var offset = boxy.game.settings.grid_size / 2;
@@ -74,6 +82,13 @@ boxy.MapEntity = class {
 
   update() {
     this.updateDisplay();
+    this.updateState();
+  }
+  
+  updateState() {
+     if (this._invincibleTime) {
+       this._invincibleTime -= boxy.game.tick.delta;
+     }
   }
 
   updateDisplay() {

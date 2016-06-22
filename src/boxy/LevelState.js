@@ -1,9 +1,14 @@
 boxy.LevelState = class {
-  constructor() {
+  constructor(difficultyLevel) {
     this._collectionLimit = 2;
     this._completedCollections = [];
     // Active collections
     this._collections = [];
+    this._difficultyLevel = difficultyLevel;
+  }
+  
+  get difficultyLevel() {
+    return this._difficultyLevel;
   }
   
   registerCollection(collection) {
@@ -40,6 +45,27 @@ boxy.LevelState = class {
         boxy.game.eventHandler.collectionComplete({
           
         });
+      }
+    }
+  }
+  
+  subtractFromCollections(colls) {
+    for (var i = 0; i < colls.length; i++) {
+      var coll = colls[i];
+      
+      // Only need to worry about unregistering folders and collections
+      if (coll.itemType == "folder" || coll.itemType == "collection") {
+        var index = this._getCollectionIndexByColor(coll.color);
+        if (index == -1) {
+          continue;
+        }
+        
+        if (coll.itemType == "folder") {
+          this._collections[index].progress--;
+        } else {
+          // Lost a collection, yikes!
+          this._collections.splice(index, 1);
+        }
       }
     }
   }

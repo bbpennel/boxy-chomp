@@ -113,7 +113,7 @@ boxy.game = (function () {
       game.settings.map_offset_x, game.settings.map_offset_y);
     game.stageMap.selectMap("test_map").renderMap();
     
-    levelState = new boxy.LevelState();
+    levelState = new boxy.LevelState(0);
 
     // Initialize the event handler
     game.eventHandler = new boxy.EventHandler();
@@ -122,9 +122,9 @@ boxy.game = (function () {
     game.mobileEntities = [];
     game.playerEntity = entityFactory.addBoxy([1, 1], 250);
     entityFactory.addGhost([1, 10], 0);
-    entityFactory.addGhost([1, 9], 1);
-    entityFactory.addGhost([1, 8], 2);
-    entityFactory.addGhost([1, 7], 3);
+    entityFactory.addGhost([1, 8], 1);
+    entityFactory.addGhost([1, 6], 2);
+    entityFactory.addGhost([1, 4], 3);
 
     // initialize collectible items
     collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);

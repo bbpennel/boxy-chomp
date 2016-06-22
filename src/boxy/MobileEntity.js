@@ -20,6 +20,36 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   get nextDirection() {
     return this._nextDirection;
   }
+  
+  reverseDirection() {
+    if (this._currentDirection != null) {
+      this._nextDirection = (this._currentDirection + 2) % 4;
+    }
+  }
+  
+  set freezeTime(time) {
+    this._freezeTime = time;
+  }
+  
+  get isFrozen() {
+    return this._freezeTime != null && this._freezeTime > 0;
+  }
+  
+  // Get the row/column position in the current 
+  nextRc() {
+    var row = this._rc[0], column = this._rc[1];
+    switch (this._currentDirection) {
+    case 0:
+      return [row - 1, column];
+    case 1:
+      return [row, column + 1];
+    case 2:
+      return [row + 1, column];
+    case 3:
+      return [row, column - 1];
+    }
+    return this._rc;
+  }
 
   get currentDirection() {
     return this._currentDirection;
@@ -41,6 +71,19 @@ boxy.MobileEntity = class extends boxy.MapEntity {
     this.updatePosition();
     this.updateDisplay();
 
+    this.updateState();
+  }
+  
+  updateState() {
+    super.updateState();
+    
+    if (this._freezeTime) {
+      this._freezeTime -= boxy.game.tick.delta;
+      if (this._freezeTime < 0) {
+        this._freezeTime = 0;
+      }
+    }
+    
     // If not moving, wait a bit then start to idle
     if (this.currentDirection == null) {
       this._stopTimer++;
@@ -76,6 +119,10 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   }
 
   updatePosition() {
+    if (this.isFrozen) {
+      return;
+    }
+    
     var newX = this._xy[0], newY = this._xy[1];
     var newGrid = this._rc;
 
