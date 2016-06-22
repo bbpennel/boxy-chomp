@@ -81,22 +81,37 @@ boxy.SpriteFactory = class {
     this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("collectibles_sprite")],
-        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 7, "regY": 0, "width": boxy.game.settings.grid_size},
+        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 19, "regY": 0, "width": boxy.game.settings.grid_size},
         "animations": {
           "folder": {
             frames: [0]
           },
-          "collection_text_blue": {
+          "folder_blue": {
             frames: [1]
           },
-          "collection_image_blue": {
+          "folder_pink": {
             frames: [2]
           },
-          "collection_audio_blue": {
+          "folder_green": {
             frames: [3]
           },
-          "disk": {
+          "folder_red": {
+            frames: [4]
+          },
+          "collection_text_blue": {
+            frames: [10]
+          },
+          "collection_image_blue": {
+            frames: [8]
+          },
+          "collection_audio_blue": {
+            frames: [12]
+          },
+          "collection_data_blue": {
             frames: [6]
+          },
+          "disk": {
+            frames: [18]
           }
         }
       });
@@ -121,8 +136,8 @@ boxy.SpriteFactory = class {
     return this._createSprite(this._mapTilesSheet, this._mapTilesContainer, tileValue, true);
   }
 
-  createFolderSprite(category, color) {
-    return this._createCollectibleSprite("folder", category, color);
+  createFolderSprite(color) {
+    return this._createCollectibleSprite("folder", null, color);
   }
   
   createCollectionSprite(category, color) {
