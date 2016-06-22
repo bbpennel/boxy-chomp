@@ -43,30 +43,34 @@ boxy.SpriteFactory = class {
     this._ghostSheet = new createjs.SpriteSheet({
         framerate: 2,
         "images": [this._loader.getResult("ghost_sprite")],
-        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 5, 
+        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 20, 
           "regY": 0, "width": boxy.game.settings.grid_size},
         // define two animations, run (loops, 1.5x speed) and jump (returns to run):
         "animations": {
-          "i_move_right": {
-            frames: [3],
-            speed: 2
-          },
-          "i_move_left": {
-            frames: [2],
-            speed: 2
-          },
-          "i_move_down": {
-            frames: [0],
-            speed: 2
-          },
-          "i_move_up": {
-            frames: [1],
-            speed: 2
-          },
-          "i_idle": {
-            frames: [0],
-            speed: 0.3
-          }
+          "i_move_right": 3,
+          "i_move_left": 2,
+          "i_move_down": 0,
+          "i_move_up": 1,
+          "i_idle": 0,
+          "i_eated": 4,
+          "cw_move_right": 8,
+          "cw_move_left": 7,
+          "cw_move_down": 5,
+          "cw_move_up": 6,
+          "cw_idle": 5,
+          "cw_eated": 9,
+          "hat_move_right": 13,
+          "hat_move_left": 12,
+          "hat_move_down": 10,
+          "hat_move_up": 11,
+          "hat_idle": 10,
+          "hat_eated": 14,
+          "mol_move_right": 18,
+          "mol_move_left": 17,
+          "mol_move_down": 15,
+          "mol_move_up": 16,
+          "mol_idle": 15,
+          "mol_eated": 19
         }
       });
     this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
@@ -83,36 +87,16 @@ boxy.SpriteFactory = class {
         "images": [this._loader.getResult("collectibles_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 19, "regY": 0, "width": boxy.game.settings.grid_size},
         "animations": {
-          "folder": {
-            frames: [0]
-          },
-          "folder_blue": {
-            frames: [1]
-          },
-          "folder_pink": {
-            frames: [2]
-          },
-          "folder_green": {
-            frames: [3]
-          },
-          "folder_red": {
-            frames: [4]
-          },
-          "collection_text_blue": {
-            frames: [10]
-          },
-          "collection_image_blue": {
-            frames: [8]
-          },
-          "collection_audio_blue": {
-            frames: [12]
-          },
-          "collection_data_blue": {
-            frames: [6]
-          },
-          "disk": {
-            frames: [18]
-          }
+          "folder": 0,
+          "folder_blue": 1,
+          "folder_pink": 2,
+          "folder_green": 3,
+          "folder_red": 4,
+          "collection_text_blue": 10,
+          "collection_image_blue": 8,
+          "collection_audio_blue": 12,
+          "collection_data_blue": 6,
+          "disk": 18
         }
       });
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
