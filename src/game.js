@@ -5,19 +5,25 @@ boxy.defaults = {
   initial_capacity: 10000,
   map_offset_y : 60,
   map_offset_x : 5,
-  bonus : {
+  collectibles : {
     folder : {
       score : 5,
-      disk : 1
+      disk : 1,
+      respawnDistance : 3,
+      respawnTime : 10000
     },
     collection : {
       score : 100,
-      disk : 1
+      disk : 1,
+      respawnDistance : 5,
+      respawnTime : 40000
     },
     disk : {
       score : 20,
       disk : 0,
-      capacity : 20000
+      capacity : 20000,
+      respawnDistance : 5,
+      respawnTime : 40000
     }
   }
 };
@@ -59,7 +65,6 @@ boxy.game = (function () {
   game.stats = {
     level : 0,
     score : 0,
-    bonus : 0,
     numberOfFiles : 0,
     numberOfFolders : 0,
     diskUsage : 0,
@@ -111,19 +116,23 @@ boxy.game = (function () {
     levelState = new boxy.LevelState();
 
     // Initialize the event handler
-    game.eventHandler = new boxy.EventHandler(entityManager);
-    game.eventHandler.levelState = levelState;
+    game.eventHandler = new boxy.EventHandler();
 
     // Initialize mobile game objects
     game.mobileEntities = [];
-    game.playerEntity = entityFactory.addBoxy(1, 1, 250);
-    entityFactory.addGhost(1, 10, 0);
-
-    game.mobileEntities.push(game.playerEntity);
+    game.playerEntity = entityFactory.addBoxy([1, 1], 250);
+    entityFactory.addGhost([1, 10], 0);
+    entityFactory.addGhost([1, 9], 1);
+    entityFactory.addGhost([1, 8], 2);
+    entityFactory.addGhost([1, 7], 3);
 
     // initialize collectible items
     collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
     collectiblesManager.spawnAll();
+    
+    game.eventHandler.collectiblesManager = collectiblesManager;
+    game.eventHandler.levelState = levelState;
+    game.eventHandler.entityManager = entityManager;
 
     gameHud = new boxy.GameHud(spriteFactory);
     gameHud.draw();
@@ -138,6 +147,8 @@ boxy.game = (function () {
     entityManager.update();
 
     gameHud.update();
+    
+    collectiblesManager.update();
 
     game.stage.update(event);
   }

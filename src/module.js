@@ -8,3 +8,5 @@ boxy.COLLECTION_ID = 2;
 boxy.DISK_ID = 3;
 // 4 = random bonus, occasionally spawns here
 boxy.RANDOM_BONUS_ID = 4;
+
+boxy.COLLECTIBLE_NAMES = ["none", "folder", "collection", "disk", "bonus"];

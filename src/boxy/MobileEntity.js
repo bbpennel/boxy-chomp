@@ -1,6 +1,6 @@
 boxy.MobileEntity = class extends boxy.MapEntity {
-  constructor(row, column, speed, sprite, spritePrefix) {
-    super(row, column, sprite);
+  constructor(rc, speed, sprite, spritePrefix) {
+    super(rc, sprite);
     this._speed = speed;
     this._stopTimer = 0;
     this._idle = false;

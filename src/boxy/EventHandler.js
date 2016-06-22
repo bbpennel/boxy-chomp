@@ -1,10 +1,17 @@
 boxy.EventHandler = class {
-  constructor(entityManager) {
-    this._entityManager = entityManager;
+  constructor() {
   }
   
   set levelState(levelState) {
     this._levelState = levelState;
+  }
+  
+  set collectiblesManager(manager) {
+    this._collectiblesManager = manager;
+  }
+  
+  set entityManager(manager) {
+    this._entityManager = manager;
   }
 
   collisionEvent(data) {
@@ -16,16 +23,19 @@ boxy.EventHandler = class {
         switch (collidee.itemType) {
         case "folder" :
           this._entityManager.destroy(collidee);
-          this._adjustStats(boxy.game.settings.bonus.folder);
+          this._adjustStats(boxy.game.settings.collectibles.folder);
+          this._collectiblesManager.markForRespawn(collidee.rc);
           break;
         case "collection" :
           this._entityManager.destroy(collidee);
-          this._adjustStats(boxy.game.settings.bonus.collection);
+          this._adjustStats(boxy.game.settings.collectibles.collection);
           this._levelState.registerCollection(collidee);
+          this._collectiblesManager.markForRespawn(collidee.rc);
           break;
         case "disk" :
           this._entityManager.destroy(collidee);
-          this._adjustStats(boxy.game.settings.bonus.disk);
+          this._adjustStats(boxy.game.settings.collectibles.disk);
+          this._collectiblesManager.markForRespawn(collidee.rc);
           break;
         }
       }

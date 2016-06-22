@@ -1,6 +1,6 @@
 boxy.MapEntity = class {
-  constructor(row, column, sprite) {
-    this._rc = [row, column];
+  constructor(rc, sprite) {
+    this._rc = [rc[0], rc[1]];
     this._snapToGrid();
     this._sprite = sprite;
     this.collisionRadiusRatio = 0.5;
@@ -55,6 +55,13 @@ boxy.MapEntity = class {
     // Two grid objects are colliding if their collision boxes are overlapping, 
     // determined by the sum of their collision radiuses exceeding the distance between centers
     return distX <= collideDist && distY <= collideDist;
+  }
+  
+  gridDistanceLessThan(rc, distance) {
+    var distR = Math.abs(this.rc[0] - rc[0]);
+    var distC = Math.abs(this.rc[1] - rc[1]);
+    
+    return distR < distance && distC < distance;
   }
 
   _snapToGrid() {

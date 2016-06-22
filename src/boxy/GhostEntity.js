@@ -1,6 +1,6 @@
 boxy.GhostEntity = class extends boxy.MobileEntity {
-  constructor(row, column, speed, sprite, spritePrefix) {
-    super(row, column, speed, sprite, spritePrefix);
+  constructor(rc, speed, sprite, spritePrefix) {
+    super(rc, speed, sprite, spritePrefix);
   }
 
   get nextDirection() {

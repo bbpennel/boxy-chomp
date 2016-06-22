@@ -24,10 +24,13 @@
       [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]
     ],
   "spawnInfo" : {
-    "collectionCount" : 2,
+    "collectionMaxConcurrent" : 2,
+    "collectionCount" : 3,
     "collectionStart" : 2,
     "collectionTypes" : ["text", "image"],
+    "collectionSpawnChance" : 0.50,
     "diskStart" : 0,
-    "diskMax" : 1
+    "diskMaxConcurrent" : 1,
+    "collectionSpawnChance" : 0.20
   }
 }
