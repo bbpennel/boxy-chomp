@@ -19,11 +19,14 @@ boxy.defaults = {
       respawnTime : 40000
     },
     disk : {
-      score : 20,
+      score : 50,
       disk : 0,
       capacity : 20000,
       respawnDistance : 5,
       respawnTime : 40000
+    },
+    ghost : {
+      score : 20
     }
   }
 };
@@ -140,6 +143,8 @@ boxy.game = (function () {
   function tick(event) {
     game.tick = event;
     
+    playerState.update();
+    
     entityManager.update();
 
     gameHud.update();
@@ -156,7 +161,9 @@ boxy.game = (function () {
     }
     switch (e.keyCode) {
       case KEYCODE_SPACE:
-        shootHeld = true;
+        game.eventHandler.sprintRequested();
+        e.preventDefault();
+        e.stopPropagation();
         return false;
       case KEYCODE_A:
       case KEYCODE_LEFT:

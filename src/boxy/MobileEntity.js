@@ -2,10 +2,12 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   constructor(rc, speed, sprite, spritePrefix) {
     super(rc, sprite);
     this._speed = speed;
+    this._computedSpeed = speed;
     this._stopTimer = 0;
     this._idle = false;
     this._spritePrefix = spritePrefix || "";
     this._positionChanged = true;
+    this._freezeTime = 0;
   }
 
   set nextDirection(dir) {
@@ -32,7 +34,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   }
   
   get isFrozen() {
-    return this._freezeTime != null && this._freezeTime > 0;
+    return this._freezeTime > 0;
   }
   
   // Get the row/column position in the current 
@@ -65,6 +67,18 @@ boxy.MobileEntity = class extends boxy.MapEntity {
 
   set speed(speed) {
     this._speed = speed;
+  }
+  
+  boostSpeed(multiplier) {
+    this._computedSpeed = this._speed * multiplier;
+  }
+  
+  resetSpeed() {
+    this._computedSpeed = this._speed;
+  }
+  
+  changeAnimation(animation) {
+    this._sprite.gotoAndPlay(this._spritePrefix + animation);
   }
 
   update() {
@@ -127,7 +141,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
     var newGrid = this._rc;
 
     if (this._currentDirection != null) {
-      var speed = boxy.calculateMoveDelta(this.speed);
+      var speed = boxy.calculateMoveDelta(this._computedSpeed);
       switch (this.currentDirection) {
         case 0:
           newY -= speed;
@@ -185,7 +199,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
 
     if (this._animationChange) {
       if (this._idle) {
-        this._sprite.gotoAndPlay(this._spritePrefix + "idle");
+        this.changeAnimation("idle");
       }
       this._animationChange = false;
     }
@@ -212,7 +226,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       if (stopMove) {
         this._sprite.stop();
       } else {
-        this._sprite.gotoAndPlay(this._spritePrefix + "move_" + dirName);
+        this.changeAnimation("move_" + dirName);
       }
     }
     return this;

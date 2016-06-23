@@ -76,9 +76,19 @@ boxy.EventHandler = class {
   }
   
   _collideGhostAndPlayer(ghost, player) {
-    if (player.isInvincible) {
+    // No collision if the player was invincible (but not sprinting), or the ghost was out of commission
+    if ((player.isInvincible && !this._playerState.isSprinting) || ghost.isEaten) {
       return;
     }
+    
+    // Boxy is sprinting, and therefore eats the ghosts instead of being hit by them
+    if (this._playerState.isSprinting) {
+      ghost.eatenFor(boxy.GHOST_EATEN_TIME);
+      this._playerState.adjustStats("ghost");
+      return;
+    }
+    
+    // Boxy is hit by the ghost, and therefore loses progress
     var difficulty = boxy.DIFFICULTY_LEVELS[this._levelState.difficultyLevel];
     
     // Get the last N consumed objects, based on difficulty level
@@ -97,5 +107,24 @@ boxy.EventHandler = class {
     player.freezeTime = difficulty.freezeDuration;
     
     console.log("Boxy lost the following items", ejected);
+  }
+  
+  sprintRequested() {
+    if (this._playerState.sprintReady) {
+      this.sprintStart();
+    }
+  }
+  
+  sprintStart() {
+    console.log("Boxy sprint!");
+    this._playerState.sprintTime = boxy.SPRINT_DURATION;
+    boxy.game.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
+  }
+  
+  sprintEnd() {
+    console.log("Sprint over, boxy can relax");
+    this._playerState.sprintTime = 0;
+    this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
+    boxy.game.playerEntity.resetSpeed();
   }
 }

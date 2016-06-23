@@ -1,6 +1,20 @@
 boxy.GhostEntity = class extends boxy.MobileEntity {
   constructor(rc, speed, sprite, spritePrefix) {
     super(rc, speed, sprite, spritePrefix);
+    this._eatenTime = 0;
+  }
+  
+  get isEaten() {
+    return this._eatenTime > 0;
+  }
+  
+  eatenFor(time) {
+    this._eatenTime = time;
+    this.changeAnimation("eaten");
+  }
+  
+  get isFrozen() {
+    return this._freezeTime > 0 || this._eatenTime > 0;
   }
 
   get nextDirection() {
@@ -31,5 +45,18 @@ boxy.GhostEntity = class extends boxy.MobileEntity {
     // console.log("Picked new direction", this._nextDirection, "from options", dirs, 
     //   "at position", this._rc, "previous dir", this._currentDirection);
     return this._nextDirection;
+  }
+  
+  update() {
+    super.update();
+    
+    if (this._eatenTime) {
+      this._eatenTime -= boxy.game.tick.delta;
+      if (this._eatenTime <= 0) {
+        this._eatenTime = 0;
+        // Reset the animation next time around
+        this._movementChange = true;
+      }
+    }
   }
 }

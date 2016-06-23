@@ -28,3 +28,9 @@ boxy.DIFFICULTY_LEVELS = {
     freezeDuration : 800
   }
 };
+
+boxy.SPRINT_COOLDOWN = 8000;
+boxy.SPRINT_DURATION = 2000;
+boxy.SPRINT_SPEED_MULTIPLIER = 2;
+
+boxy.GHOST_EATEN_TIME = 5000;

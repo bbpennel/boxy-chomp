@@ -52,25 +52,25 @@ boxy.SpriteFactory = class {
           "i_move_down": 0,
           "i_move_up": 1,
           "i_idle": 0,
-          "i_eated": 4,
+          "i_eaten": 4,
           "cw_move_right": 8,
           "cw_move_left": 7,
           "cw_move_down": 5,
           "cw_move_up": 6,
           "cw_idle": 5,
-          "cw_eated": 9,
+          "cw_eaten": 9,
           "hat_move_right": 13,
           "hat_move_left": 12,
           "hat_move_down": 10,
           "hat_move_up": 11,
           "hat_idle": 10,
-          "hat_eated": 14,
+          "hat_eaten": 14,
           "mol_move_right": 18,
           "mol_move_left": 17,
           "mol_move_down": 15,
           "mol_move_up": 16,
           "mol_idle": 15,
-          "mol_eated": 19
+          "mol_eaten": 19
         }
       });
     this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
