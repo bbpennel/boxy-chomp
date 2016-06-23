@@ -158,9 +158,19 @@ boxy.CollectiblesManager = class {
     
     switch (spawnType) {
       case boxy.FOLDER_ID:
-        return this._entityFactory.addFolder(rc);
+        var color = this._folderColors[Math.floor(Math.random() * this._folderColors.length)];
+        return this._entityFactory.addFolder(rc, color);
       case boxy.COLLECTION_ID:
-        return this._entityFactory.addCollection(rc, "text", "blue");
+        var color = "plain";
+        // get the available collection colors, set difference all colors against active
+        var availColors = boxy.arrayDifference(boxy.COLLECTIBLE_COLORS, this._folderColors);
+        // Randomly pick one of the remaining colors, or generic color if none left
+        if (availColors.length > 0) {
+          color = availColors[Math.floor(Math.random() * availColors.length)];
+        }
+        console.log("Spawning colllection", rc, color);
+        // TODO pick format from the set of formats allowed by the level
+        return this._entityFactory.addCollection(rc, "text", color);
       case boxy.DISK_ID:
         return this._entityFactory.addDisk(rc);
     }
@@ -174,5 +184,22 @@ boxy.CollectiblesManager = class {
     return (maxConcur === undefined || maxConcur > this._typeCountCurrent[spawnType])
         && (totalLimit === undefined || totalLimit > this._typeCountTotal[spawnType])
         && (spawnChance === undefined || spawnChance < 0 || Math.random() < spawnChance);
+  }
+  
+  set folderColors(colors) {
+    this._folderColors = colors;
+  }
+  
+  get folderColors() {
+    return this._folderColors;
+  }
+  
+  randomizeFolderColors(folderEntities) {
+    for (var i = 0; i < folderEntities.length; i++) {
+      var folder = folderEntities[i];
+      var newColor = this._folderColors[Math.floor(Math.random() * this._folderColors.length)];
+      
+      folder.color = newColor;
+    }
   }
 }

@@ -44,6 +44,7 @@ boxy.EventHandler = class {
     switch (collidee.itemType) {
     case "folder" :
       this._entityManager.destroy(collidee);
+      this._levelState.addToCollection(collidee);
       this._playerState.adjustStats("folder");
       this._collectiblesManager.consume(collidee);
       break;
@@ -126,5 +127,19 @@ boxy.EventHandler = class {
     this._playerState.sprintTime = 0;
     this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
     boxy.game.playerEntity.resetSpeed();
+  }
+  
+  collectionRegistered(data) {
+    var colors = this._levelState.activeColors;
+    colors.push(data.color);
+    this._collectiblesManager.folderColors = colors;
+    
+    var folders = this._entityManager.getCollectiblesByType("folder");
+    // TODO test this
+    this._collectiblesManager.randomizeFolderColors(folders);
+  }
+  
+  collectionCompleted(data) {
+    
   }
 }

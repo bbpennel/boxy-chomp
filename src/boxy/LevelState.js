@@ -6,6 +6,7 @@ boxy.LevelState = class {
     // Active collections
     this._collections = [];
     this._difficultyLevel = difficultyLevel;
+    this._activeColors = ["plain"];
   }
   
   get difficultyLevel() {
@@ -27,6 +28,8 @@ boxy.LevelState = class {
       };
       
       this._collections.push(collEntry);
+      
+      boxy.game.eventHandler.collectionRegistered(collEntry);
     }
   }
   
@@ -39,6 +42,7 @@ boxy.LevelState = class {
     var collection = this._collections[collectionIndex];
     if (collection != null) {
       collection.progress++;
+      console.log("Progress:", collection.color, collection.progress, "/", collection.goal);
       if (collection.progress >= collection.goal) {
         this._completedCollections.push(collection);
         this._collections.splice(collectionIndex, 1);
@@ -78,5 +82,13 @@ boxy.LevelState = class {
       }
     }
     return -1;
+  }
+  
+  get collectionProgress() {
+    return this._collections;
+  }
+  
+  get activeColors() {
+    return this._activeColors;
   }
 }

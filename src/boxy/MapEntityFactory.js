@@ -13,9 +13,9 @@ boxy.MapEntityFactory = class {
     return entity;
   }
 
-  addFolder(rc, format, color) {
-    var sprite = this._spriteFactory.createFolderSprite(format, color);
-    var entity = new boxy.CollectibleEntity(rc, "folder", format, color, sprite);
+  addFolder(rc, color) {
+    var sprite = this._spriteFactory.createFolderSprite(color);
+    var entity = new boxy.CollectibleEntity(rc, "folder", null, color, sprite);
     entity.collisionRadiusRatio = 0.1;
     this._entityManager.register(entity);
     return entity;

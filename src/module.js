@@ -10,6 +10,7 @@ boxy.DISK_ID = 3;
 boxy.RANDOM_BONUS_ID = 4;
 
 boxy.COLLECTIBLE_NAMES = ["none", "folder", "collection", "disk", "bonus"];
+boxy.COLLECTIBLE_COLORS = ["plain", "blue", "pink", "green", "red"];
 
 boxy.DIFFICULTY_LEVELS = {
   0 : {

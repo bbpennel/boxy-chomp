@@ -85,18 +85,35 @@ boxy.SpriteFactory = class {
     this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("collectibles_sprite")],
-        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 19, "regY": 0, "width": boxy.game.settings.grid_size},
+        "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 27, "regY": 0, "width": boxy.game.settings.grid_size},
         "animations": {
-          "folder": 0,
+          "folder_plain": 0,
           "folder_blue": 1,
           "folder_pink": 2,
           "folder_green": 3,
           "folder_red": 4,
-          "collection_text_blue": 10,
-          "collection_image_blue": 8,
-          "collection_audio_blue": 12,
-          "collection_data_blue": 6,
-          "disk": 18
+          "collection_plain": 5,
+          "collection_blue": 6,
+          "collection_pink": 7,
+          "collection_green": 8,
+          "collection_red": 9,
+          "collection_data_blue": 10,
+          "collection_data_pink": 11,
+          "collection_data_green": 12,
+          "collection_data_red": 13,
+          "collection_image_blue": 14,
+          "collection_image_pink": 15,
+          "collection_image_green": 16,
+          "collection_image_red": 17,
+          "collection_text_blue": 18,
+          "collection_text_pink": 19,
+          "collection_text_green": 20,
+          "collection_text_red": 21,
+          "collection_audio_blue": 22,
+          "collection_audio_pink": 23,
+          "collection_audio_green": 24,
+          "collection_audio_red": 25,
+          "disk": 26
         }
       });
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
@@ -124,22 +141,16 @@ boxy.SpriteFactory = class {
     return this._createCollectibleSprite("folder", null, color);
   }
   
-  createCollectionSprite(category, color) {
-    return this._createCollectibleSprite("collection", category, color);
+  createCollectionSprite(format, color) {
+    return this._createCollectibleSprite("collection", format, color);
   }
 
   createDiskSprite(category, color) {
     return this._createCollectibleSprite("disk");
   }
   
-  _createCollectibleSprite(itemType, category, color) {
-    var animation = itemType;
-    if (category != null) {
-      animation += "_" + category;
-    }
-    if (color != null) {
-      animation += "_" + color;
-    }
+  _createCollectibleSprite(itemType, format, color) {
+    var animation = boxy.CollectibleEntity.buildAnimationName(itemType, format, color);
     
     return this._createSprite(this._collectiblesSheet, this._collectiblesContainer, animation, true);
   }

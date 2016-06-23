@@ -124,6 +124,7 @@ boxy.game = (function () {
 
     // initialize collectible items
     collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
+    collectiblesManager.folderColors = levelState.activeColors;
     collectiblesManager.spawnAll();
     
     game.eventHandler.collectiblesManager = collectiblesManager;
