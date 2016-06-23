@@ -1,3 +1,4 @@
+// Tracks progress on the current level
 boxy.LevelState = class {
   constructor(difficultyLevel) {
     this._collectionLimit = 2;

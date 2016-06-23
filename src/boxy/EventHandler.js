@@ -17,6 +17,10 @@ boxy.EventHandler = class {
   set stageMap(stageMap) {
     this._stageMap = stageMap;
   }
+  
+  set playerState(playerState) {
+    this._playerState = playerState;
+  }
 
   collisionEvent(data) {
     var collider = data.collider;
@@ -40,18 +44,18 @@ boxy.EventHandler = class {
     switch (collidee.itemType) {
     case "folder" :
       this._entityManager.destroy(collidee);
-      this._adjustStats(boxy.game.settings.collectibles.folder);
+      this._playerState.adjustStats("folder");
       this._collectiblesManager.consume(collidee);
       break;
     case "collection" :
       this._entityManager.destroy(collidee);
-      this._adjustStats(boxy.game.settings.collectibles.collection);
+      this._playerState.adjustStats("collection");
       this._levelState.registerCollection(collidee);
       this._collectiblesManager.consume(collidee);
       break;
     case "disk" :
       this._entityManager.destroy(collidee);
-      this._adjustStats(boxy.game.settings.collectibles.disk);
+      this._playerState.adjustStats("disk");
       this._collectiblesManager.consume(collidee);
       break;
     }
@@ -85,7 +89,7 @@ boxy.EventHandler = class {
     // Substract the value of the last N consumed items
     for (var i = 0; i < ejected.length; i++) {
       var ejEntity = ejected[i];
-      this._adjustStats(boxy.game.settings.collectibles[ejEntity.itemType], true);
+      this._playerState.adjustStats(ejEntity.itemType, true);
     }
     
     // Make boxy invincible for a little while after
@@ -93,17 +97,5 @@ boxy.EventHandler = class {
     player.freezeTime = difficulty.freezeDuration;
     
     console.log("Boxy lost the following items", ejected);
-  }
-
-  _adjustStats(stats, subtract) {
-    if (stats.score) {
-      boxy.game.stats.score += (subtract? -1 : 1) * stats.score;
-    }
-    if (stats.disk) {
-      boxy.game.stats.diskUsage += (subtract? -1 : 1) * stats.disk;
-    }
-    if (stats.capacity) {
-      boxy.game.stats.diskCapacity += (subtract? -1 : 1) * stats.capacity;
-    }
   }
 }

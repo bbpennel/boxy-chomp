@@ -11,3 +11,7 @@ boxy.indexOfPair = function(array, pair) {
 boxy.calculateMoveDelta = function(speed) {
   return boxy.game.tick.delta / 1000 * speed;
 }
+
+boxy.isString = function(value) {
+  return typeof value === 'string' || value instanceof String;
+}

@@ -53,6 +53,7 @@ boxy.game = (function () {
 
   var stageMap;
   var levelState;
+  var playerState;
 
   var mobileEntities;
   var playerEntity;
@@ -61,15 +62,6 @@ boxy.game = (function () {
 
   var game = {};
   game.settings = boxy.defaults;
-
-  game.stats = {
-    level : 0,
-    score : 0,
-    numberOfFiles : 0,
-    numberOfFolders : 0,
-    diskUsage : 0,
-    diskCapacity : game.settings.initial_capacity
-  };
 
   game.init = function() {
     this.stage = new createjs.Stage("boxyCanvas", false, false);
@@ -114,6 +106,7 @@ boxy.game = (function () {
     game.stageMap.selectMap("test_map").renderMap();
     
     levelState = new boxy.LevelState(0);
+    playerState = new boxy.PlayerState(game.settings.initial_capacity);
 
     // Initialize the event handler
     game.eventHandler = new boxy.EventHandler();
@@ -133,8 +126,11 @@ boxy.game = (function () {
     game.eventHandler.collectiblesManager = collectiblesManager;
     game.eventHandler.levelState = levelState;
     game.eventHandler.entityManager = entityManager;
+    game.eventHandler.playerState = playerState;
 
-    gameHud = new boxy.GameHud(spriteFactory);
+    gameHud = new boxy.GameHud();
+    gameHud.spriteFactory = spriteFactory;
+    gameHud.playerState = playerState;
     gameHud.draw();
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
