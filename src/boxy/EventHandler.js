@@ -135,11 +135,17 @@ boxy.EventHandler = class {
     this._collectiblesManager.folderColors = colors;
     
     var folders = this._entityManager.getCollectiblesByType("folder");
-    // TODO test this
     this._collectiblesManager.randomizeFolderColors(folders);
   }
   
   collectionCompleted(data) {
+    var colors = this._levelState.activeColors;
+    var index = colors.indexOf(data.color);
+    colors.splice(index, 1);
     
+    this._collectiblesManager.folderColors = colors;
+    
+    var folders = this._entityManager.getCollectiblesByType("folder");
+    this._collectiblesManager.randomizeFolderColors(folders);
   }
 }

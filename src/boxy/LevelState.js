@@ -47,9 +47,7 @@ boxy.LevelState = class {
         this._completedCollections.push(collection);
         this._collections.splice(collectionIndex, 1);
         
-        boxy.game.eventHandler.collectionComplete({
-          
-        });
+        boxy.game.eventHandler.collectionCompleted(collection);
       }
     }
   }
