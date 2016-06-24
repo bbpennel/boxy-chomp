@@ -6,6 +6,7 @@ boxy.CollectiblesManager = class {
     this._entityFactory = entityFactory;
     this._consumedQueue = [];
     this._respawnQueue = [];
+    this._collectionFormatIndex = 0;
     this._typeCountTotal = [];
     this._typeCountCurrent = [];
     for (var i = 0; i < boxy.COLLECTIBLE_NAMES.length; i++) {
@@ -58,17 +59,20 @@ boxy.CollectiblesManager = class {
   
   consume(collectible) {
     this._consumedQueue.push(collectible);
-    this._markForRespawn(collectible.rc);
+    this._markForRespawn(collectible);
   }
   
   // Register that the collectible at the given location has been removed, and queue it for respawn
-  _markForRespawn(rc) {
+  _markForRespawn(entity) {
+    // The type of the object in a location may not match the spawn type of the tile
+    var instanceTypeId = boxy.COLLECTIBLE_NAMES.indexOf(entity.itemType);
+    this._typeCountCurrent[instanceTypeId]--;
+    
+    var rc = entity.rc;
+    
     var spawnType = this._spawnMap[rc[0]][rc[1]];
     var typeName = boxy.COLLECTIBLE_NAMES[spawnType];
     var typeInfo = boxy.game.settings.collectibles[typeName];
-    
-    this._typeCountCurrent[spawnType]--;
-    this._typeCountTotal[spawnType]--;
     
     this._respawnQueue.push({
       timeToRespawn : typeInfo.respawnTime + ((Math.random() - 0.5) * 0.4 * typeInfo.respawnTime),
@@ -168,9 +172,12 @@ boxy.CollectiblesManager = class {
         if (availColors.length > 0) {
           color = availColors[Math.floor(Math.random() * availColors.length)];
         }
-        console.log("Spawning colllection", rc, color);
-        // TODO pick format from the set of formats allowed by the level
-        return this._entityFactory.addCollection(rc, "text", color);
+
+        // pick format from the set of formats allowed by the level
+        var format = this._spawnInfo.collectionTypes[this._collectionFormatIndex];
+        this._collectionFormatIndex = ++this._collectionFormatIndex % this._spawnInfo.collectionTypes.length;
+        
+        return this._entityFactory.addCollection(rc, format, color);
       case boxy.DISK_ID:
         return this._entityFactory.addDisk(rc);
     }
@@ -181,6 +188,7 @@ boxy.CollectiblesManager = class {
     var spawnChance = this._spawnInfo[typeName + "SpawnChance"];
     var totalLimit = this._spawnInfo[typeName + "Count"];
     var maxConcur = this._spawnInfo[typeName + "MaxConcurrent"];
+
     return (maxConcur === undefined || maxConcur > this._typeCountCurrent[spawnType])
         && (totalLimit === undefined || totalLimit > this._typeCountTotal[spawnType])
         && (spawnChance === undefined || spawnChance < 0 || Math.random() < spawnChance);
