@@ -40,6 +40,8 @@ boxy.CollectibleEntity = class extends boxy.MapEntity {
   }
 
   updateDisplay() {
+    super.updateDisplay();
+    
     if (!this._stateChange) {
       return;
     }

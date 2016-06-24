@@ -4,6 +4,10 @@ boxy.MapEntity = class {
     this._snapToGrid();
     this._sprite = sprite;
     this.collisionRadiusRatio = 0.5;
+    this._invincibleTime = 0;
+    this._blinkVisible = true;
+    this._blinkTime = 0;
+    this._blinkCycle = 0;
   }
 
   set id(id) {
@@ -36,6 +40,12 @@ boxy.MapEntity = class {
   
   get isInvincible() {
     return this._invincibleTime != null && this._invincibleTime > 0;
+  }
+  
+  set blinkTime(time) {
+    this._blinkTime = time;
+    this._blinkCycle = boxy.BLINK_ENTITY_RATE;
+    this._blinkVisible = false;
   }
 
   center() {
@@ -86,11 +96,32 @@ boxy.MapEntity = class {
   }
   
   updateState() {
-     if (this._invincibleTime) {
+     if (this._invincibleTime > 0) {
        this._invincibleTime -= boxy.game.tick.delta;
+     }
+     
+     // If blinking has been activated, then manage blink cycling until it is over
+     if (this._blinkTime > 0) {
+       this._blinkTime -= boxy.game.tick.delta;
+       this._blinkCycle -= boxy.game.tick.delta;
+       
+       if (this._blinkTime <= 0) {
+         this._blinkVisible = null;
+         this._blinkDone = true;
+       } else if (this._blinkCycle <= 0) {
+         this._blinkVisible = !this._blinkVisible;
+         this._blinkCycle = boxy.BLINK_ENTITY_RATE;
+       }
      }
   }
 
   updateDisplay() {
+    if (this._blinkVisible !== null) {
+      this._sprite.visible = this._blinkVisible;
+    } else if (this._blinkDone) {
+      // Blinking has finished, make sure the sprite is visible in the end
+      this._sprite.visible = true;
+      this._blinkDone = false;
+    }
   }
 }

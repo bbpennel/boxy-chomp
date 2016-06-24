@@ -105,6 +105,7 @@ boxy.EventHandler = class {
     
     // Make boxy invincible for a little while after
     player.invincibleTime = difficulty.invincibleDuration;
+    player.blinkTime = difficulty.invincibleDuration;
     player.freezeTime = difficulty.freezeDuration;
     
     console.log("Boxy lost the following items", ejected);
