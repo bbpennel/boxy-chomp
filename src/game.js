@@ -115,7 +115,7 @@ boxy.game = (function () {
     }
     game.stage.scaleX = game.stage.scaleY = scale;
     
-    levelState = new boxy.LevelState(0);
+    levelState = new boxy.LevelState(0, 0);
     playerState = new boxy.PlayerState(game.settings.initial_capacity);
 
     // Initialize the event handler
@@ -141,6 +141,7 @@ boxy.game = (function () {
 
     gameHud.spriteFactory = spriteFactory;
     gameHud.playerState = playerState;
+    gameHud.levelState = levelState;
     gameHud.wh = mapDimensions;
     gameHud.draw();
     

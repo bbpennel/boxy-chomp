@@ -1,11 +1,13 @@
 // Tracks progress on the current level
 boxy.LevelState = class {
-  constructor(difficultyLevel) {
+  constructor(stageNumber, difficultyLevel) {
     this._collectionLimit = 2;
     this._completedCollections = [];
     // Active collections
     this._collections = [];
     this._difficultyLevel = difficultyLevel;
+    this._stageNumber = stageNumber;
+    this._stageLevel = boxy.STAGE_LEVELS[this._stageNumber];
     this._activeColors = ["plain"];
   }
   
@@ -24,7 +26,7 @@ boxy.LevelState = class {
         color : collection.color,
         collObj : collection,
         progress : 0,
-        goal : 10
+        goal : this._stageLevel.itemsPerCollection
       };
       
       this._collections.push(collEntry);
@@ -42,7 +44,6 @@ boxy.LevelState = class {
     var collection = this._collections[collectionIndex];
     if (collection != null) {
       collection.progress++;
-      console.log("Progress:", collection.color, collection.progress, "/", collection.goal);
       if (collection.progress >= collection.goal) {
         this._completedCollections.push(collection);
         this._collections.splice(collectionIndex, 1);
@@ -89,5 +90,21 @@ boxy.LevelState = class {
   
   get activeColors() {
     return this._activeColors;
+  }
+  
+  get completedCollections() {
+    return this._completedCollections;
+  }
+  
+  get completedCollectionsCount() {
+    return this._completedCollections.length;
+  }
+  
+  get collectionGoal() {
+    return this._stageLevel.collectionGoal;
+  }
+  
+  hasReachedGoal() {
+    return this._completedCollections.length >= this._stageLevel.collectionGoal;
   }
 }

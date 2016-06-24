@@ -12,6 +12,10 @@ boxy.GameHud = class {
     this._spriteFactory = factory;
   }
   
+  set levelState(levelState) {
+    this._levelState = levelState;
+  }
+  
   set wh(wh) {
     this._wh = wh;
   }
@@ -33,12 +37,29 @@ boxy.GameHud = class {
     this._diskCapacityText.x = this._wh[0] / 2 + 30;
     this._diskCapacityText.y = 50;
     this._diskCapacityText.textAlign = "left";
+    
+    var goalOffset = 5;
+    this._levelGoalIcon = this._spriteFactory.createCollectionSprite([goalOffset, 0], null, "plain");
+    goalOffset += boxy.game.settings.grid_size * 1.5 + 10;
+    this._levelGoalProgressText = this._spriteFactory.createText("0");
+    this._levelGoalProgressText.x = goalOffset;
+    this._levelGoalProgressText.y = 50;
+    this._levelGoalProgressText.textAlign = "right"; 
+    this._levelGoalDivider = this._spriteFactory.createText("/");
+    this._levelGoalDivider.x = goalOffset;
+    this._levelGoalDivider.y = 50;
+    goalOffset += 30;
+    this._levelGoalTargetText = this._spriteFactory.createText(this._levelState.collectionGoal);
+    this._levelGoalTargetText.x = goalOffset;
+    this._levelGoalTargetText.y = 50;
+    this._levelGoalTargetText.textAlign = "left";
   }
 
   update() {
     this._scoreText.text = this._playerState.score;
     this._diskUsageText.text = this._formatDiskUsage(this._playerState.diskUsage);
     this._diskCapacityText.text = this._formatDiskUsage(this._playerState.diskCapacity);
+    this._levelGoalProgressText.text = this._levelState.completedCollectionsCount;
     
     for (var i = 0; i < this._collectionProgress.length; i++) {
       var progress = this._collectionProgress[i];

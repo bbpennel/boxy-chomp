@@ -156,5 +156,9 @@ boxy.EventHandler = class {
     this._collectiblesManager.randomizeFolderColors(folders);
     
     this._gameHud.removeCollectionProgress(data);
+    
+    if (completed && this._levelState.hasReachedGoal()) {
+      console.log("YOU ARE WINNER!");
+    }
   }
 }

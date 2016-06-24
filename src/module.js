@@ -14,7 +14,7 @@ boxy.COLLECTIBLE_COLORS = ["plain", "blue", "pink", "green", "red"];
 
 boxy.DIFFICULTY_LEVELS = {
   0 : {
-    damageCost : 3,
+    damageCost : 5,
     invincibleDuration : 4000,
     freezeDuration : 500
   },
@@ -29,6 +29,21 @@ boxy.DIFFICULTY_LEVELS = {
     freezeDuration : 800
   }
 };
+
+boxy.STAGE_LEVELS = [
+  {
+    collectionGoal : 2,
+    itemsPerCollection : 15
+  },
+  {
+    collectionGoal : 3,
+    itemsPerCollection : 15
+  },
+  {
+    collectionGoal : 4,
+    itemsPerCollection : 20
+  }
+];
 
 boxy.SPRINT_COOLDOWN = 8000;
 boxy.SPRINT_DURATION = 2000;
