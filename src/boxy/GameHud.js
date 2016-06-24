@@ -10,22 +10,26 @@ boxy.GameHud = class {
   set spriteFactory(factory) {
     this._spriteFactory = factory;
   }
+  
+  set wh(wh) {
+    this._wh = wh;
+  }
 
   draw() {
     this._scoreText = this._spriteFactory.createText("");
-    this._scoreText.x = boxy.game.w - 10;
+    this._scoreText.x = this._wh[0] - 10;
     this._scoreText.y = 50;
     this._scoreText.textAlign = "right";
 
     this._diskUsageText = this._spriteFactory.createText("");
-    this._diskUsageText.x = boxy.game.w / 2;
+    this._diskUsageText.x = this._wh[0] / 2;
     this._diskUsageText.y = 50;
     this._diskUsageText.textAlign = "right";
     this._diskDivider = this._spriteFactory.createText("/");
-    this._diskDivider.x = boxy.game.w / 2;
+    this._diskDivider.x = this._wh[0] / 2;
     this._diskDivider.y = 50;
     this._diskCapacityText = this._spriteFactory.createText("");
-    this._diskCapacityText.x = boxy.game.w / 2 + 30;
+    this._diskCapacityText.x = this._wh[0] / 2 + 30;
     this._diskCapacityText.y = 50;
     this._diskCapacityText.textAlign = "left";
   }

@@ -119,10 +119,20 @@ boxy.SpriteFactory = class {
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
 
     this._textContainer = new createjs.Container();
+    
+    this._backgroundContainer = new createjs.Container();
 
     // Add containers to the stage in render order
-    this._stage.addChild(this._mapTilesContainer, this._textContainer,
+    this._stage.addChild(this._backgroundContainer, this._mapTilesContainer, this._textContainer,
       this._collectiblesContainer, this._ghostContainer, this._boxyContainer);
+  }
+  
+  createBackground(xy, wh, color) {
+    var background = new createjs.Shape();
+    background.graphics.beginFill(color).drawRect(xy[0], xy[1], wh[0], wh[1]);
+    console.log("Backgrond", xy[0], xy[1], wh[0], wh[1]);
+    this._backgroundContainer.addChild(background);
+    return background;
   }
 
   createBoxySprite(xy) {

@@ -3,7 +3,8 @@ boxy.defaults = {
   grid_size: 70,
   map_file: "test.json",
   initial_capacity: 10000,
-  map_offset_y : 60,
+  map_offset_top : 60,
+  map_offset_bottom : 60,
   map_offset_x : 5,
   collectibles : {
     folder : {
@@ -88,10 +89,6 @@ boxy.game = (function () {
   }
 
   function handleComplete(eventx) {
-    background = new createjs.Shape();
-    background.graphics.beginFill("#1a3149").drawRect(0, 0, game.w, game.h);
-    game.stage.addChild(background);
-
     spriteFactory = new boxy.SpriteFactory(loader, game.stage);
     spriteFactory.init();
     entityManager = new boxy.MapEntityManager(game.stage);
@@ -105,8 +102,18 @@ boxy.game = (function () {
       }
     });
     game.stageMap = new boxy.StageMap(mapData, spriteFactory, game.settings.grid_size,
-      game.settings.map_offset_x, game.settings.map_offset_y);
+      game.settings.map_offset_x, game.settings.map_offset_top, game.settings.map_offset_bottom);
     game.stageMap.selectMap("test_map").renderMap();
+    
+    // Rescale content to match ratio of the canvas
+    var mapDimensions = game.stageMap.mapDimensions;
+    var ratio = mapDimensions[0] / mapDimensions[1];
+    var windowRatio = game.w / game.h;
+    var scale = game.w / mapDimensions[0];
+    if (windowRatio > ratio) {
+        scale = game.h / mapDimensions[1];
+    }
+    game.stage.scaleX = game.stage.scaleY = scale;
     
     levelState = new boxy.LevelState(0);
     playerState = new boxy.PlayerState(game.settings.initial_capacity);
@@ -117,7 +124,6 @@ boxy.game = (function () {
     // initialize collectible items
     collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
     collectiblesManager.folderColors = levelState.activeColors;
-    
     
     // Inject dependencies
     game.eventHandler.collectiblesManager = collectiblesManager;
@@ -133,6 +139,7 @@ boxy.game = (function () {
     gameHud = new boxy.GameHud();
     gameHud.spriteFactory = spriteFactory;
     gameHud.playerState = playerState;
+    gameHud.wh = mapDimensions;
     gameHud.draw();
     
     // Setup game objects

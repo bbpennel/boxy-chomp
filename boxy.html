@@ -9,6 +9,20 @@
 <script src="dist/boxy.js"></script>
 <script>
 function init() {
+  console.log($("#boxyCanvas").width(), $("#boxyCanvas").height());
+  var ratio = 16 / 9;
+  var heightRatio = 9 / 16;
+  var width = $(window).width();
+  var height = width * heightRatio;
+  
+  if (height > $(window).height()) {
+    height = $(window).height();
+    width = height * ratio;
+  }
+  
+  $("#boxyCanvas").attr("width", Math.floor(width));
+  $("#boxyCanvas").attr("height", Math.floor(height));
+  
   boxy.game.init();
 }
 </script>
@@ -22,7 +36,7 @@ function init() {
 
 
 <body onload="init();">
-  <canvas id="boxyCanvas" width="1120" height="630"></canvas>
+  <canvas id="boxyCanvas" width="793" height="446"></canvas>
 
 
 
