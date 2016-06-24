@@ -73,11 +73,30 @@ boxy.GameHud = class {
     goalText.textAlign = "left";
     
     this._collectionProgress.push({
+      icon : collIcon,
       progressText : progressText,
       divider : divider,
       goalText : goalText,
       progressData : progress
     });
+  }
+  
+  removeCollectionProgress(progress) {
+    var index;
+    for (var i = 0; i < this._collectionProgress.length; i++) {
+      if (this._collectionProgress[i].progress === progress) {
+        index = i;
+        break;
+      }
+    }
+    
+    
+    var hudProgress = this._collectionProgress.splice(index, 1)[0];
+    console.log("Removing collection", hudProgress, index);
+    hudProgress.icon.parent.removeChild(hudProgress.icon);
+    hudProgress.progressText.parent.removeChild(hudProgress.progressText);
+    hudProgress.divider.parent.removeChild(hudProgress.divider);
+    hudProgress.goalText.parent.removeChild(hudProgress.goalText);
   }
 
   _formatDiskUsage(bytes) {

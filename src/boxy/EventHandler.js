@@ -145,7 +145,7 @@ boxy.EventHandler = class {
     this._gameHud.addCollectionProgress(data);
   }
   
-  collectionCompleted(data) {
+  collectionRemoved(data, completed) {
     var colors = this._levelState.activeColors;
     var index = colors.indexOf(data.color);
     colors.splice(index, 1);
@@ -154,5 +154,7 @@ boxy.EventHandler = class {
     
     var folders = this._entityManager.getCollectiblesByType("folder");
     this._collectiblesManager.randomizeFolderColors(folders);
+    
+    this._gameHud.removeCollectionProgress(data);
   }
 }

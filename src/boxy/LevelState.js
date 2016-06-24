@@ -47,7 +47,7 @@ boxy.LevelState = class {
         this._completedCollections.push(collection);
         this._collections.splice(collectionIndex, 1);
         
-        boxy.game.eventHandler.collectionCompleted(collection);
+        boxy.game.eventHandler.collectionRemoved(collection, true);
       }
     }
   }
@@ -67,7 +67,8 @@ boxy.LevelState = class {
           this._collections[index].progress--;
         } else {
           // Lost a collection, yikes!
-          this._collections.splice(index, 1);
+          var collection = this._collections.splice(index, 1)[0];
+          boxy.game.eventHandler.collectionRemoved(collection, false);
         }
       }
     }
