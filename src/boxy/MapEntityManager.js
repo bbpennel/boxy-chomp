@@ -97,4 +97,16 @@ boxy.MapEntityManager = class {
       }
     }
   }
+  
+  getCollectiblesByType(itemType) {
+    var result = [];
+    for (var i = 0; i < this._entities.length; i++) {
+      var entity = this._entities[i];
+      if (!(entity instanceof boxy.CollectibleEntity) || entity.itemType != itemType) {
+        continue;
+      }
+      result.push(entity);
+    }
+    return result;
+  }
 }

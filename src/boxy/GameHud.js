@@ -1,7 +1,14 @@
 boxy.GameHud = class {
-  constructor(spriteFactory) {
+  constructor() {
     this._sizes = ['mb', 'gb', 'tb', 'pb'];
-    this._spriteFactory = spriteFactory;
+  }
+  
+  set playerState(state) {
+    this._playerState = state;
+  }
+  
+  set spriteFactory(factory) {
+    this._spriteFactory = factory;
   }
 
   draw() {
@@ -24,9 +31,9 @@ boxy.GameHud = class {
   }
 
   update() {
-    this._scoreText.text = boxy.game.stats.score;
-    this._diskUsageText.text = this._formatDiskUsage(boxy.game.stats.diskUsage);
-    this._diskCapacityText.text = this._formatDiskUsage(boxy.game.stats.diskCapacity);
+    this._scoreText.text = this._playerState.score;
+    this._diskUsageText.text = this._formatDiskUsage(this._playerState.diskUsage);
+    this._diskCapacityText.text = this._formatDiskUsage(this._playerState.diskCapacity);
   }
 
   _formatDiskUsage(bytes) {
