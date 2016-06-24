@@ -125,18 +125,20 @@ boxy.game = (function () {
     collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
     collectiblesManager.folderColors = levelState.activeColors;
     
+    gameHud = new boxy.GameHud();
+    
     // Inject dependencies
     game.eventHandler.collectiblesManager = collectiblesManager;
     game.eventHandler.levelState = levelState;
     game.eventHandler.entityManager = entityManager;
     game.eventHandler.playerState = playerState;
+    game.eventHandler.gameHud = gameHud;
     
     entityFactory.stage = game.stage;
     entityFactory.stageMap = game.stageMap;
     entityFactory.entityManager = entityManager;
     entityFactory.spriteFactory = spriteFactory;
 
-    gameHud = new boxy.GameHud();
     gameHud.spriteFactory = spriteFactory;
     gameHud.playerState = playerState;
     gameHud.wh = mapDimensions;

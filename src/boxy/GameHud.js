@@ -1,6 +1,7 @@
 boxy.GameHud = class {
   constructor() {
     this._sizes = ['mb', 'gb', 'tb', 'pb'];
+    this._collectionProgress = [];
   }
   
   set playerState(state) {
@@ -38,6 +39,45 @@ boxy.GameHud = class {
     this._scoreText.text = this._playerState.score;
     this._diskUsageText.text = this._formatDiskUsage(this._playerState.diskUsage);
     this._diskCapacityText.text = this._formatDiskUsage(this._playerState.diskCapacity);
+    
+    for (var i = 0; i < this._collectionProgress.length; i++) {
+      var progress = this._collectionProgress[i];
+      
+      progress.progressText.text = progress.progressData.progress;
+    }
+  }
+  
+  addCollectionProgress(progress) {
+    var offsetX = this._collectionProgress.length * 280;
+    var offsetY = this._wh[1] - 20;
+    console.log("Offset", offsetX, offsetY);
+    
+    var collIcon = this._spriteFactory.createCollectionSprite(
+        [offsetX, offsetY - 50], progress.collObj.format, progress.collObj.color);
+    
+    offsetX += boxy.game.settings.grid_size * 1.8;
+    var progressText = this._spriteFactory.createText("");
+    progressText.x = offsetX;
+    progressText.y = offsetY;
+    progressText.textAlign = "right";
+    
+    offsetX += 0;
+    var divider = this._spriteFactory.createText("/");
+    divider.x = offsetX;
+    divider.y = offsetY;
+    
+    offsetX += 30;
+    var goalText = this._spriteFactory.createText(progress.goal);
+    goalText.x = offsetX;
+    goalText.y = offsetY;
+    goalText.textAlign = "left";
+    
+    this._collectionProgress.push({
+      progressText : progressText,
+      divider : divider,
+      goalText : goalText,
+      progressData : progress
+    });
   }
 
   _formatDiskUsage(bytes) {

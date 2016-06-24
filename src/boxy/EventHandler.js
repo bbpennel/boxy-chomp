@@ -21,6 +21,10 @@ boxy.EventHandler = class {
   set playerState(playerState) {
     this._playerState = playerState;
   }
+  
+  set gameHud(gameHud) {
+    this._gameHud = gameHud;
+  }
 
   collisionEvent(data) {
     var collider = data.collider;
@@ -67,7 +71,7 @@ boxy.EventHandler = class {
     // Ghost should reverse directions
     //console.log("Ghost on ghost violence", collider.rc, rc, collidee.rc);
     if (rc[0] == collidee.rc[0] && rc[1] == collidee.rc[1]) {
-      console.log("Turn the beat around");
+      //console.log("Turn the beat around");
       collider.reverseDirection();
     } else {
       //console.log("Turn the other cheek");
@@ -137,6 +141,8 @@ boxy.EventHandler = class {
     
     var folders = this._entityManager.getCollectiblesByType("folder");
     this._collectiblesManager.randomizeFolderColors(folders);
+    
+    this._gameHud.addCollectionProgress(data);
   }
   
   collectionCompleted(data) {
