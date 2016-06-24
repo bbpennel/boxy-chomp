@@ -107,9 +107,8 @@ boxy.StageMap = class {
           continue;
         }
 
-        var sprite = this._spriteFactory.createMapTileSprite(tileValue);
-        sprite.x = j * this._gridSize + this._offsetX;
-        sprite.y = offsetY + this._offsetY;
+        var xy = this.gridToCoordinate([i,j]);
+        var sprite = this._spriteFactory.createMapTileSprite(xy, tileValue);
         this._tileSprites.push(sprite);
       }
     }

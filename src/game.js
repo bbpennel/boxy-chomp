@@ -95,7 +95,7 @@ boxy.game = (function () {
     spriteFactory = new boxy.SpriteFactory(loader, game.stage);
     spriteFactory.init();
     entityManager = new boxy.MapEntityManager(game.stage);
-    entityFactory = new boxy.MapEntityFactory(entityManager, spriteFactory, game.stage);
+    entityFactory = new boxy.MapEntityFactory(entityManager, spriteFactory, game.stage, game.stageMap);
     
     // Setup map manager
     mapData = {};
@@ -114,6 +114,28 @@ boxy.game = (function () {
     // Initialize the event handler
     game.eventHandler = new boxy.EventHandler();
 
+    // initialize collectible items
+    collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
+    collectiblesManager.folderColors = levelState.activeColors;
+    
+    
+    // Inject dependencies
+    game.eventHandler.collectiblesManager = collectiblesManager;
+    game.eventHandler.levelState = levelState;
+    game.eventHandler.entityManager = entityManager;
+    game.eventHandler.playerState = playerState;
+    
+    entityFactory.stage = game.stage;
+    entityFactory.stageMap = game.stageMap;
+    entityFactory.entityManager = entityManager;
+    entityFactory.spriteFactory = spriteFactory;
+
+    gameHud = new boxy.GameHud();
+    gameHud.spriteFactory = spriteFactory;
+    gameHud.playerState = playerState;
+    gameHud.draw();
+    
+    // Setup game objects
     // Initialize mobile game objects
     game.mobileEntities = [];
     game.playerEntity = entityFactory.addBoxy([1, 1], 250);
@@ -121,21 +143,8 @@ boxy.game = (function () {
     entityFactory.addGhost([1, 8], 1);
     entityFactory.addGhost([1, 6], 2);
     entityFactory.addGhost([1, 4], 3);
-
-    // initialize collectible items
-    collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
-    collectiblesManager.folderColors = levelState.activeColors;
-    collectiblesManager.spawnAll();
     
-    game.eventHandler.collectiblesManager = collectiblesManager;
-    game.eventHandler.levelState = levelState;
-    game.eventHandler.entityManager = entityManager;
-    game.eventHandler.playerState = playerState;
-
-    gameHud = new boxy.GameHud();
-    gameHud.spriteFactory = spriteFactory;
-    gameHud.playerState = playerState;
-    gameHud.draw();
+    collectiblesManager.spawnAll();
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
