@@ -194,6 +194,8 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   }
 
   updateDisplay() {
+    super.updateDisplay();
+    
     this._sprite.x = this._xy[0];
     this._sprite.y = this._xy[1];
 

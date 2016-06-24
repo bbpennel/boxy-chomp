@@ -1,12 +1,26 @@
 boxy.MapEntityFactory = class {
-  constructor(entityManager, spriteFactory, stage) {
-    this._entityManager = entityManager;
-    this._spriteFactory = spriteFactory;
+  constructor() {
+  }
+  
+  set spriteFactory(factory) {
+    this._spriteFactory = factory;
+  }
+  
+  set stage(stage) {
     this._stage = stage;
+  }
+  
+  set stageMap(stageMap) {
+    this._stageMap = stageMap;
+  }
+  
+  set entityManager(manager) {
+    this._entityManager = manager;
   }
 
   addBoxy(rc, speed) {
-    var sprite = this._spriteFactory.createBoxySprite();
+    var xy = this._stageMap.gridToCoordinate(rc);
+    var sprite = this._spriteFactory.createBoxySprite(xy);
     var entity = new boxy.MobileEntity(rc, speed, sprite);
     this._entityManager.register(entity);
     entity.collisionRadiusRatio = 0.9;
@@ -14,7 +28,8 @@ boxy.MapEntityFactory = class {
   }
 
   addFolder(rc, color) {
-    var sprite = this._spriteFactory.createFolderSprite(color);
+    var xy = this._stageMap.gridToCoordinate(rc);
+    var sprite = this._spriteFactory.createFolderSprite(xy, color);
     var entity = new boxy.CollectibleEntity(rc, "folder", null, color, sprite);
     entity.collisionRadiusRatio = 0.1;
     this._entityManager.register(entity);
@@ -22,7 +37,8 @@ boxy.MapEntityFactory = class {
   }
 
   addCollection(rc, format, color) {
-    var sprite = this._spriteFactory.createCollectionSprite(format, color);
+    var xy = this._stageMap.gridToCoordinate(rc);
+    var sprite = this._spriteFactory.createCollectionSprite(xy, format, color);
     var entity = new boxy.CollectibleEntity(rc, "collection", format, color, sprite);
     entity.collisionRadiusRatio = 0.6;
     this._entityManager.register(entity);
@@ -30,7 +46,8 @@ boxy.MapEntityFactory = class {
   }
   
   addDisk(rc) {
-    var sprite = this._spriteFactory.createDiskSprite();
+    var xy = this._stageMap.gridToCoordinate(rc);
+    var sprite = this._spriteFactory.createDiskSprite(xy);
     var entity = new boxy.CollectibleEntity(rc, "disk", null, null, sprite);
     entity.collisionRadiusRatio = 0.7;
     this._entityManager.register(entity);
@@ -38,7 +55,8 @@ boxy.MapEntityFactory = class {
   }
   
   addGhost(rc, ghostIdentity) {
-    var sprite = this._spriteFactory.createGhostSprite();
+    var xy = this._stageMap.gridToCoordinate(rc);
+    var sprite = this._spriteFactory.createGhostSprite(xy);
     var speed = 200;
     var prefix;
     switch (ghostIdentity) {

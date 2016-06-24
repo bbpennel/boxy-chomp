@@ -119,44 +119,56 @@ boxy.SpriteFactory = class {
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
 
     this._textContainer = new createjs.Container();
+    
+    this._backgroundContainer = new createjs.Container();
 
     // Add containers to the stage in render order
-    this._stage.addChild(this._mapTilesContainer, this._textContainer,
+    this._stage.addChild(this._backgroundContainer, this._mapTilesContainer, this._textContainer,
       this._collectiblesContainer, this._ghostContainer, this._boxyContainer);
   }
+  
+  createBackground(xy, wh, color) {
+    var background = new createjs.Shape();
+    background.graphics.beginFill(color).drawRect(xy[0], xy[1], wh[0], wh[1]);
+    console.log("Backgrond", xy[0], xy[1], wh[0], wh[1]);
+    this._backgroundContainer.addChild(background);
+    return background;
+  }
 
-  createBoxySprite() {
-    return this._createSprite(this._boxySheet, this._boxyContainer, "idle");
+  createBoxySprite(xy) {
+    return this._createSprite(xy, this._boxySheet, this._boxyContainer, "idle");
   }
   
-  createGhostSprite() {
-    return this._createSprite(this._ghostSheet, this._ghostContainer, 0);
+  createGhostSprite(xy) {
+    return this._createSprite(xy, this._ghostSheet, this._ghostContainer, 0);
   }
 
-  createMapTileSprite(tileValue) {
-    return this._createSprite(this._mapTilesSheet, this._mapTilesContainer, tileValue, true);
+  createMapTileSprite(xy, tileValue) {
+    return this._createSprite(xy, this._mapTilesSheet, this._mapTilesContainer, tileValue, true);
   }
 
-  createFolderSprite(color) {
-    return this._createCollectibleSprite("folder", null, color);
+  createFolderSprite(xy, color) {
+    return this._createCollectibleSprite(xy, "folder", null, color);
   }
   
-  createCollectionSprite(format, color) {
-    return this._createCollectibleSprite("collection", format, color);
+  createCollectionSprite(xy, format, color) {
+    return this._createCollectibleSprite(xy, "collection", format, color);
   }
 
-  createDiskSprite(category, color) {
-    return this._createCollectibleSprite("disk");
+  createDiskSprite(xy, category, color) {
+    return this._createCollectibleSprite(xy, "disk");
   }
   
-  _createCollectibleSprite(itemType, format, color) {
+  _createCollectibleSprite(xy, itemType, format, color) {
     var animation = boxy.CollectibleEntity.buildAnimationName(itemType, format, color);
     
-    return this._createSprite(this._collectiblesSheet, this._collectiblesContainer, animation, true);
+    return this._createSprite(xy, this._collectiblesSheet, this._collectiblesContainer, animation, true);
   }
   
-  _createSprite(spritesheet, container, animation, stopAnimation) {
+  _createSprite(xy, spritesheet, container, animation, stopAnimation) {
     var sprite = new createjs.Sprite(spritesheet, animation);
+    sprite.x = xy[0];
+    sprite.y = xy[1];
     container.addChild(sprite);
     if (stopAnimation) {
       sprite.stop();
