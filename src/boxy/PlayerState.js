@@ -8,7 +8,7 @@ boxy.PlayerState = class {
   }
   
   get sprintReady() {
-    return this._sprintCooldown <= 0;
+    return this._sprintCooldown <= 0 && this._sprintTime <= 0;
   }
   
   set sprintCooldown(time) {
@@ -21,6 +21,11 @@ boxy.PlayerState = class {
   
   set sprintTime(time) {
     this._sprintTime = time;
+    this._sprintInitialTime = time;
+  }
+  
+  get sprintPercentRemaining() {
+    return this._sprintTime / this._sprintInitialTime;
   }
   
   get score() {

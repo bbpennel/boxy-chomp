@@ -21,11 +21,13 @@ boxy.GameHud = class {
   }
 
   draw() {
+    // Render the players score
     this._scoreText = this._spriteFactory.createText("");
     this._scoreText.x = this._wh[0] - 10;
     this._scoreText.y = 50;
     this._scoreText.textAlign = "right";
 
+    // Draw the disk usage, disk cap display
     this._diskUsageText = this._spriteFactory.createText("");
     this._diskUsageText.x = this._wh[0] / 2;
     this._diskUsageText.y = 50;
@@ -38,6 +40,7 @@ boxy.GameHud = class {
     this._diskCapacityText.y = 50;
     this._diskCapacityText.textAlign = "left";
     
+    // Draw the total collection completion goal for the level
     var goalOffset = 5;
     this._levelGoalIcon = this._spriteFactory.createCollectionSprite([goalOffset, 0], null, "plain");
     goalOffset += boxy.game.settings.grid_size * 1.5 + 10;
@@ -53,6 +56,11 @@ boxy.GameHud = class {
     this._levelGoalTargetText.x = goalOffset;
     this._levelGoalTargetText.y = 50;
     this._levelGoalTargetText.textAlign = "left";
+    
+    this._sprintIndicatorText = this._spriteFactory.createText("");
+    this._sprintIndicatorText.x = this._wh[0] - 5;
+    this._sprintIndicatorText.y = this._wh[1] - 20;
+    this._sprintIndicatorText.textAlign = "right";
   }
 
   update() {
@@ -60,6 +68,22 @@ boxy.GameHud = class {
     this._diskUsageText.text = this._formatDiskUsage(this._playerState.diskUsage);
     this._diskCapacityText.text = this._formatDiskUsage(this._playerState.diskCapacity);
     this._levelGoalProgressText.text = this._levelState.completedCollectionsCount;
+    
+    if (this._playerState.sprintReady) {
+      this._sprintIndicatorText.text = "Sprint ready!";
+    } else {
+      if (this._playerState.isSprinting) {
+        var remaining = this._playerState.sprintPercentRemaining;
+        remaining = Math.floor(remaining * 10);
+        var dots = "";
+        for (var i = 0; i < remaining; i++) {
+          dots += ".";
+        }
+        this._sprintIndicatorText.text = dots;
+      } else {
+        this._sprintIndicatorText.text = "recharging...";
+      }
+    }
     
     for (var i = 0; i < this._collectionProgress.length; i++) {
       var progress = this._collectionProgress[i];
