@@ -5,31 +5,7 @@ boxy.defaults = {
   initial_capacity: 10000,
   map_offset_top : 60,
   map_offset_bottom : 60,
-  map_offset_x : 5,
-  collectibles : {
-    folder : {
-      score : 5,
-      disk : 1,
-      respawnDistance : 3,
-      respawnTime : 10000
-    },
-    collection : {
-      score : 100,
-      disk : 1,
-      respawnDistance : 5,
-      respawnTime : 40000
-    },
-    disk : {
-      score : 50,
-      disk : 0,
-      capacity : 20000,
-      respawnDistance : 5,
-      respawnTime : 40000
-    },
-    ghost : {
-      score : 20
-    }
-  }
+  map_offset_x : 5
 };
 
 boxy.game = (function () {

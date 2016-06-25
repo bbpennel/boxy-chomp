@@ -71,7 +71,6 @@ boxy.GameHud = class {
   addCollectionProgress(progress) {
     var offsetX = this._collectionProgress.length * 280;
     var offsetY = this._wh[1] - 20;
-    console.log("Offset", offsetX, offsetY);
     
     var collIcon = this._spriteFactory.createCollectionSprite(
         [offsetX, offsetY - 50], progress.collObj.format, progress.collObj.color);
@@ -111,9 +110,7 @@ boxy.GameHud = class {
       }
     }
     
-    
     var hudProgress = this._collectionProgress.splice(index, 1)[0];
-    console.log("Removing collection", hudProgress, index);
     hudProgress.icon.parent.removeChild(hudProgress.icon);
     hudProgress.progressText.parent.removeChild(hudProgress.progressText);
     hudProgress.divider.parent.removeChild(hudProgress.divider);

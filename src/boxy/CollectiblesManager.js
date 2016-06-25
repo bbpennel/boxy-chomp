@@ -72,7 +72,7 @@ boxy.CollectiblesManager = class {
     
     var spawnType = this._spawnMap[rc[0]][rc[1]];
     var typeName = boxy.COLLECTIBLE_NAMES[spawnType];
-    var typeInfo = boxy.game.settings.collectibles[typeName];
+    var typeInfo = boxy.COLLECTIBLE_TYPES[typeName];
     
     this._respawnQueue.push({
       timeToRespawn : typeInfo.respawnTime + ((Math.random() - 0.5) * 0.4 * typeInfo.respawnTime),

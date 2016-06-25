@@ -11,6 +11,57 @@ boxy.RANDOM_BONUS_ID = 4;
 
 boxy.COLLECTIBLE_NAMES = ["none", "folder", "collection", "disk", "bonus"];
 boxy.COLLECTIBLE_COLORS = ["plain", "blue", "pink", "green", "red"];
+boxy.COLLECTIBLE_FORMATS = ["text", "image", "audio", "data"];
+
+boxy.COLLECTIBLE_TYPES = {
+  folder : {
+    respawnDistance : 3,
+    respawnTime : 10000
+  },
+  collection : {
+    respawnDistance : 5,
+    respawnTime : 20000
+  },
+  disk : {
+    respawnDistance : 5,
+    respawnTime : 25000
+  },
+};
+
+boxy.STAT_VALUES = {
+  folder : {
+    score : 5,
+    disk : 1
+  },
+  folder_text : {
+    score : 5,
+    disk : 50
+  },
+  folder_image : {
+    score : 40,
+    disk : 500
+  },
+  folder_audio : {
+    score : 100,
+    disk : 4000
+  },
+  folder_data : {
+    score: 250,
+    disk : 15000
+  },
+  collection : {
+    score : 100,
+    disk : 1
+  },
+  disk : {
+    score : 100,
+    disk : 0,
+    capacity : 10000
+  },
+  ghost : {
+    score : 50
+  }
+};
 
 boxy.DIFFICULTY_LEVELS = {
   0 : {
@@ -19,12 +70,12 @@ boxy.DIFFICULTY_LEVELS = {
     freezeDuration : 500
   },
   1 : {
-    damageCost : 5,
+    damageCost : 10,
     invincibleDuration: 4000,
     freezeDuration : 500
   },
   2 : {
-    damageCost : 10,
+    damageCost : 15,
     invincibleDuration: 2000,
     freezeDuration : 800
   }
@@ -33,15 +84,30 @@ boxy.DIFFICULTY_LEVELS = {
 boxy.STAGE_LEVELS = [
   {
     collectionGoal : 2,
-    itemsPerCollection : 15
+    itemsPerCollection : {
+      text : 15,
+      image : 10,
+      audio : 5,
+      data : 3
+    }
   },
   {
     collectionGoal : 3,
-    itemsPerCollection : 15
+    itemsPerCollection : {
+      text : 15,
+      image : 10,
+      audio : 5,
+      data : 3
+    }
   },
   {
     collectionGoal : 4,
-    itemsPerCollection : 20
+    itemsPerCollection : {
+      text : 18,
+      image : 12,
+      audio : 7,
+      data : 4
+    }
   }
 ];
 

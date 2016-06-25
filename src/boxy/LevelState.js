@@ -26,7 +26,7 @@ boxy.LevelState = class {
         color : collection.color,
         collObj : collection,
         progress : 0,
-        goal : this._stageLevel.itemsPerCollection
+        goal : this._stageLevel.itemsPerCollection[collection.format]
       };
       
       this._collections.push(collEntry);

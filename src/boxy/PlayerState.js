@@ -54,7 +54,7 @@ boxy.PlayerState = class {
 
   adjustStats(stats, subtract) {
     if (boxy.isString(stats)) {
-      stats = boxy.game.settings.collectibles[stats];
+      stats = boxy.STAT_VALUES[stats];
     }
     
     if (stats.score) {

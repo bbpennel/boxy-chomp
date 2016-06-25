@@ -49,7 +49,11 @@ boxy.EventHandler = class {
     case "folder" :
       this._entityManager.destroy(collidee);
       this._levelState.addToCollection(collidee);
-      this._playerState.adjustStats("folder");
+      var key = "folder";
+      if (collidee.format) {
+        key += "_" + collidee.format
+      }
+      this._playerState.adjustStats(key);
       this._collectiblesManager.consume(collidee);
       break;
     case "collection" :
