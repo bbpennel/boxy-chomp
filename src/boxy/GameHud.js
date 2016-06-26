@@ -69,26 +69,34 @@ boxy.GameHud = class {
     this._diskCapacityText.text = this._formatDiskUsage(this._playerState.diskCapacity);
     this._levelGoalProgressText.text = this._levelState.completedCollectionsCount;
     
-    if (this._playerState.sprintReady) {
-      this._sprintIndicatorText.text = "Sprint ready!";
-    } else {
-      if (this._playerState.isSprinting) {
-        var remaining = this._playerState.sprintPercentRemaining;
-        remaining = Math.floor(remaining * 10);
-        var dots = "";
-        for (var i = 0; i < remaining; i++) {
-          dots += ".";
-        }
-        this._sprintIndicatorText.text = dots;
-      } else {
-        this._sprintIndicatorText.text = "recharging...";
+    if (this._playerState.isSprinting) {
+      var remaining = this._playerState.sprintPercentRemaining;
+      remaining = Math.floor(remaining * 10);
+      var dots = "";
+      for (var i = 0; i < remaining; i++) {
+        dots += ".";
       }
+      this._sprintIndicatorText.text = dots;
     }
     
     for (var i = 0; i < this._collectionProgress.length; i++) {
       var progress = this._collectionProgress[i];
       
       progress.progressText.text = progress.progressData.progress;
+    }
+  }
+  
+  changeSprintState(state) {
+    if (state == "ready") {
+      this._sprintIndicatorText.text = "Sprint ready!";
+      this._sprintIndicatorText.color = "#FFFFFF";
+      createjs.Tween.get(this._sprintIndicatorText).to({ scaleX : 1.1, scaleY : 1.1 }, 100, createjs.Ease.getPowInOut(4))
+          .to({ scaleX : 1, scaleY : 1 }, 100, createjs.Ease.getPowInOut(4));
+    } else if (state == "start") {
+      
+    } else if (state == "end") {
+      this._sprintIndicatorText.text = "recharging...";
+      this._sprintIndicatorText.color = "#7789E5";
     }
   }
   

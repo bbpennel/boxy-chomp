@@ -119,23 +119,24 @@ boxy.EventHandler = class {
     console.log("Boxy lost the following items", ejected);
   }
   
+  sprintEvent(state) {
+    if (state == "start") {
+      console.log("Boxy sprint!");
+      this._playerState.sprintTime = boxy.SPRINT_DURATION;
+      boxy.game.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
+    } else if (state == "end") {
+      console.log("Sprint over, boxy can relax");
+      this._playerState.sprintTime = 0;
+      this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
+      boxy.game.playerEntity.resetSpeed();
+    }
+    this._gameHud.changeSprintState(state);
+  }
+  
   sprintRequested() {
     if (this._playerState.sprintReady) {
-      this.sprintStart();
+      this.sprintEvent("start");
     }
-  }
-  
-  sprintStart() {
-    console.log("Boxy sprint!");
-    this._playerState.sprintTime = boxy.SPRINT_DURATION;
-    boxy.game.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
-  }
-  
-  sprintEnd() {
-    console.log("Sprint over, boxy can relax");
-    this._playerState.sprintTime = 0;
-    this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
-    boxy.game.playerEntity.resetSpeed();
   }
   
   collectionRegistered(data) {

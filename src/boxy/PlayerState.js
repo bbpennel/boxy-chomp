@@ -44,7 +44,7 @@ boxy.PlayerState = class {
     if (!this.sprintReady) {
       this._sprintCooldown -= boxy.game.tick.delta;
       if (this._sprintCooldown < 0) {
-        console.log("Sprint is ready!");
+        boxy.game.eventHandler.sprintEvent("ready");
         this._sprintCooldown = 0;
       }
     }
@@ -52,7 +52,7 @@ boxy.PlayerState = class {
     if (this.isSprinting) {
       this._sprintTime -= boxy.game.tick.delta;
       if (this._sprintTime <= 0) {
-        boxy.game.eventHandler.sprintEnd();
+        boxy.game.eventHandler.sprintEvent("end");
       }
     }
   }
