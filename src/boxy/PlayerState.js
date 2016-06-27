@@ -7,6 +7,14 @@ boxy.PlayerState = class {
     this._sprintTime = 0;
   }
   
+  set playerEntity(playerEntity) {
+    this._playerEntity = playerEntity;
+  }
+  
+  get playerEntity() {
+    return this._playerEntity;
+  }
+  
   get sprintReady() {
     return this._sprintCooldown <= 0 && this._sprintTime <= 0;
   }

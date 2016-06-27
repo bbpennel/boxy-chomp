@@ -1,6 +1,6 @@
 boxy.CollectibleEntity = class extends boxy.MapEntity {
-  constructor(rc, itemType, format, color, sprite) {
-    super(rc, sprite);
+  constructor(rc, itemType, format, color, sprite, stageMap) {
+    super(rc, sprite, stageMap);
     this._itemType = itemType;
     this._format = format;
     this._color = color;

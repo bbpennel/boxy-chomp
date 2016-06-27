@@ -30,14 +30,14 @@ boxy.EventHandler = class {
     var collider = data.collider;
     var collidee = data.collidee;
 
-    if (collider === boxy.game.playerEntity) {
+    if (collider === this._playerState.playerEntity) {
       if (collidee instanceof boxy.CollectibleEntity) {
         this._collidePlayerAndCollectible(collider, collidee);
       }
     } else if (collider instanceof boxy.GhostEntity) {
       if (collidee instanceof boxy.GhostEntity) {
         this._collideGhostAndGhost(collider, collidee);
-      } else if (collidee === boxy.game.playerEntity) {
+      } else if (collidee === this._playerState.playerEntity) {
         this._collideGhostAndPlayer(collider, collidee);
       }
     }
@@ -123,12 +123,12 @@ boxy.EventHandler = class {
     if (state == "start") {
       console.log("Boxy sprint!");
       this._playerState.sprintTime = boxy.SPRINT_DURATION;
-      boxy.game.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
+      this._playerState.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
     } else if (state == "end") {
       console.log("Sprint over, boxy can relax");
       this._playerState.sprintTime = 0;
       this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
-      boxy.game.playerEntity.resetSpeed();
+      this._playerState.playerEntity.resetSpeed();
     }
     this._gameHud.changeSprintState(state);
   }

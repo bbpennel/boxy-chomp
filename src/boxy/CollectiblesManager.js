@@ -14,6 +14,10 @@ boxy.CollectiblesManager = class {
       this._typeCountCurrent.push(0);
     }
   }
+  
+  set playerState(playerState) {
+    this._playerState = playerState;
+  }
 
   spawnAll() {
     this._collectionLocations = this._determineStartingLocations(boxy.COLLECTION_ID, this._spawnInfo.collectionStart);
@@ -39,7 +43,7 @@ boxy.CollectiblesManager = class {
       var info = this._respawnQueue[i];
       info.timeToRespawn -= delta;
       // If the respawn time is up and boxy is not too close, then respawn
-      if (info.timeToRespawn <= 0 && !boxy.game.playerEntity.gridDistanceLessThan(info.rc, info.respawnDistance)) {
+      if (info.timeToRespawn <= 0 && !this._playerState.playerEntity.gridDistanceLessThan(info.rc, info.respawnDistance)) {
         this._respawnEntity(info.rc, info.spawnType);
         this._respawnQueue.splice(i, 1);
       } else {
@@ -114,7 +118,7 @@ boxy.CollectiblesManager = class {
       return false;
     }
 
-    var playerLoc = boxy.game.playerEntity.rc;
+    var playerLoc = this._playerState.playerEntity.rc;
     return !(playerLoc[0] == row && playerLoc[1] == column);
   }
 
