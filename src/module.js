@@ -128,3 +128,5 @@ boxy.KEYCODE_A = 65;
 boxy.KEYCODE_D = 68;
 boxy.KEYCODE_S = 83;
 boxy.KEYCODE_SPACE = 32;
+
+boxy.FILE_SIZE_SUFFIXES = ['mb', 'gb', 'tb', 'pb'];
