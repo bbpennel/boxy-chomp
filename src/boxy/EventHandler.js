@@ -25,6 +25,10 @@ boxy.EventHandler = class {
   set gameHud(gameHud) {
     this._gameHud = gameHud;
   }
+  
+  set spriteFactory(spriteFactory) {
+    this._spriteFactory = spriteFactory;
+  }
 
   collisionEvent(data) {
     var collider = data.collider;
@@ -163,7 +167,19 @@ boxy.EventHandler = class {
     this._gameHud.removeCollectionProgress(data);
     
     if (completed && this._levelState.hasReachedGoal()) {
-      console.log("YOU ARE WINNER!");
+      this.levelComplete();
     }
+  }
+  
+  levelComplete() {
+    this._playerState.playerEntity.changeAnimation("move_down");
+    var containers = this._spriteFactory.containers;
+    createjs.Tween.get(containers.ghosts).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.collectibles).wait(300).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.mapTiles).wait(500).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.text).wait(500).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.boxy).wait(2000).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    console.log("YOU ARE WINNER!");
+    boxy.game.switchToSummaryMode(this._playerState);
   }
 }
