@@ -40,7 +40,20 @@ boxy.game = (function () {
     loader.addEventListener("complete", handleComplete);
     loader.loadManifest(manifest, true, "art/");
     loader.loadManifest(mapsManifest, true, "maps/");
-  }
+  };
+  
+  game.switchToSummaryMode = function(playerState, levelState, eventTracker) {
+    spriteFactory.resetAll();
+    
+    mode = new boxy.LevelSummaryMode();
+    mode.spriteFactory = spriteFactory;
+    mode.stage = stage;
+    mode.playerState = playerState;
+    mode.levelState = levelState;
+    mode.eventTracker = eventTracker;
+    
+    mode.init().draw();
+  };
 
   function handleComplete(event) {
     spriteFactory = new boxy.SpriteFactory(loader, stage);

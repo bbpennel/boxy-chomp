@@ -79,6 +79,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   
   changeAnimation(animation) {
     this._sprite.gotoAndPlay(this._spritePrefix + animation);
+    return this;
   }
 
   update() {

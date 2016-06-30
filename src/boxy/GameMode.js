@@ -58,6 +58,8 @@ boxy.GameMode = class {
     boxy.game.eventHandler.entityManager = this._entityManager;
     boxy.game.eventHandler.playerState = this._playerState;
     boxy.game.eventHandler.gameHud = this._gameHud;
+    boxy.game.eventHandler.spriteFactory = this._spriteFactory;
+    boxy.game.eventHandler.gameMode = this;
     
     entityFactory.stage = this._stage;
     entityFactory.stageMap = stageMap;
@@ -85,6 +87,10 @@ boxy.GameMode = class {
   }
   
   tick(e) {
+    if (this._paused) {
+      return;
+    }
+    
     this._playerState.update();
     
     this._entityManager.update();
@@ -92,6 +98,16 @@ boxy.GameMode = class {
     this._gameHud.update();
     
     this._collectiblesManager.update();
+  }
+  
+  pause() {
+    this._paused = true;
+    return this;
+  }
+  
+  unpause() {
+    this._paused = false;
+    return this;
   }
   
   handleKeyDown(e) {

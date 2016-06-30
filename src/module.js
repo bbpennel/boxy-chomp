@@ -89,7 +89,9 @@ boxy.STAGE_LEVELS = [
       image : 10,
       audio : 5,
       data : 3
-    }
+    },
+    sprintsPar : 10,
+    timePar : 90
   },
   {
     collectionGoal : 3,
@@ -130,3 +132,5 @@ boxy.KEYCODE_S = 83;
 boxy.KEYCODE_SPACE = 32;
 
 boxy.FILE_SIZE_SUFFIXES = ['mb', 'gb', 'tb', 'pb'];
+
+boxy.SCORE_DISK_USAGE_MULTIPLIER = 0.001;

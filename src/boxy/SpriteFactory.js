@@ -9,6 +9,20 @@ boxy.SpriteFactory = class {
     this._generateSpritesheets();
     this.addContainers();
   }
+  
+  // Removes all displayed elements, except for the background
+  resetAll() {
+    this._mapTilesContainer.removeAllChildren();
+    this._mapTilesContainer.alpha = 1;
+    this._textContainer.removeAllChildren();
+    this._textContainer.alpha = 1;
+    this._collectiblesContainer.removeAllChildren();
+    this._collectiblesContainer.alpha = 1;
+    this._ghostContainer.removeAllChildren();
+    this._ghostContainer.alpha = 1;
+    this._boxyContainer.removeAllChildren();
+    this._boxyContainer.alpha = 1;
+  }
 
   _generateSpritesheets() {
     if (this._spritesheetsInitialized) {
