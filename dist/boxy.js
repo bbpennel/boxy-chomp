@@ -11,24 +11,113 @@ boxy.RANDOM_BONUS_ID = 4;
 
 boxy.COLLECTIBLE_NAMES = ["none", "folder", "collection", "disk", "bonus"];
 boxy.COLLECTIBLE_COLORS = ["plain", "blue", "pink", "green", "red"];
+boxy.COLLECTIBLE_FORMATS = ["text", "image", "audio", "data"];
+
+boxy.COLLECTIBLE_TYPES = {
+  folder : {
+    respawnDistance : 3,
+    respawnTime : 10000
+  },
+  collection : {
+    respawnDistance : 5,
+    respawnTime : 20000
+  },
+  disk : {
+    respawnDistance : 5,
+    respawnTime : 25000
+  },
+};
+
+boxy.STAT_VALUES = {
+  folder : {
+    score : 5,
+    disk : 1,
+    files : 10
+  },
+  folder_text : {
+    score : 5,
+    disk : 50,
+    files : 50
+  },
+  folder_image : {
+    score : 40,
+    disk : 500,
+    files : 30
+  },
+  folder_audio : {
+    score : 100,
+    disk : 4000,
+    files : 10
+  },
+  folder_data : {
+    score: 250,
+    disk : 15000,
+    files : 3
+  },
+  collection : {
+    score : 100,
+    disk : 1
+  },
+  disk : {
+    score : 100,
+    capacity : 10000
+  },
+  ghost : {
+    score : 50
+  }
+};
 
 boxy.DIFFICULTY_LEVELS = {
   0 : {
-    damageCost : 3,
+    damageCost : 5,
     invincibleDuration : 4000,
     freezeDuration : 500
   },
   1 : {
-    damageCost : 5,
+    damageCost : 10,
     invincibleDuration: 4000,
     freezeDuration : 500
   },
   2 : {
-    damageCost : 10,
+    damageCost : 15,
     invincibleDuration: 2000,
     freezeDuration : 800
   }
 };
+
+boxy.STAGE_LEVELS = [
+  {
+    collectionGoal : 2,
+    itemsPerCollection : {
+      text : 15,
+      image : 10,
+      audio : 5,
+      data : 3
+    },
+    sprintPar : 10,
+    sprintMaxScore : 1000,
+    timePar : 90,
+    timeMaxScore : 1000
+  },
+  {
+    collectionGoal : 3,
+    itemsPerCollection : {
+      text : 15,
+      image : 10,
+      audio : 5,
+      data : 3
+    }
+  },
+  {
+    collectionGoal : 4,
+    itemsPerCollection : {
+      text : 18,
+      image : 12,
+      audio : 7,
+      data : 4
+    }
+  }
+];
 
 boxy.SPRINT_COOLDOWN = 8000;
 boxy.SPRINT_DURATION = 2000;
@@ -36,17 +125,32 @@ boxy.SPRINT_SPEED_MULTIPLIER = 2;
 
 boxy.BLINK_ENTITY_RATE = 200;
 
-boxy.GHOST_EATEN_TIME = 5000;;
+boxy.GHOST_EATEN_TIME = 5000;
+
+boxy.KEYCODE_DOWN = 40;
+boxy.KEYCODE_UP = 38;
+boxy.KEYCODE_LEFT = 37;
+boxy.KEYCODE_RIGHT = 39;
+boxy.KEYCODE_W = 87;
+boxy.KEYCODE_A = 65;
+boxy.KEYCODE_D = 68;
+boxy.KEYCODE_S = 83;
+boxy.KEYCODE_SPACE = 32;
+
+boxy.FILE_SIZE_SUFFIXES = ['mb', 'gb', 'tb', 'pb'];
+
+boxy.SCORE_DISK_USAGE_MULTIPLIER = 0.02;;
 boxy.MapEntity = class {
-  constructor(rc, sprite) {
+  constructor(rc, sprite, stageMap) {
     this._rc = [rc[0], rc[1]];
-    this._snapToGrid();
     this._sprite = sprite;
     this.collisionRadiusRatio = 0.5;
     this._invincibleTime = 0;
     this._blinkVisible = true;
     this._blinkTime = 0;
     this._blinkCycle = 0;
+    this._stageMap = stageMap;
+    this._snapToGrid();
   }
 
   set id(id) {
@@ -122,7 +226,7 @@ boxy.MapEntity = class {
   }
 
   _snapToGrid() {
-    this._xy = boxy.game.stageMap.gridToCoordinate(this._rc);
+    this._xy = this._stageMap.gridToCoordinate(this._rc);
   }
 
   _addToGame() {
@@ -165,8 +269,8 @@ boxy.MapEntity = class {
   }
 };
 boxy.CollectibleEntity = class extends boxy.MapEntity {
-  constructor(rc, itemType, format, color, sprite) {
-    super(rc, sprite);
+  constructor(rc, itemType, format, color, sprite, stageMap) {
+    super(rc, sprite, stageMap);
     this._itemType = itemType;
     this._format = format;
     this._color = color;
@@ -199,9 +303,7 @@ boxy.CollectibleEntity = class extends boxy.MapEntity {
   set color(color) {
     this._color = color;
     // Update the animation for the newly set color
-    console.log(this._itemType, this._format, this._color);
     var animationName = boxy.CollectibleEntity.buildAnimationName(this._itemType, this._format, this._color);
-    console.log("Change color animation", animationName);
     this._sprite.gotoAndPlay(animationName);
   }
 
@@ -232,6 +334,10 @@ boxy.CollectiblesManager = class {
       this._typeCountCurrent.push(0);
     }
   }
+  
+  set playerState(playerState) {
+    this._playerState = playerState;
+  }
 
   spawnAll() {
     this._collectionLocations = this._determineStartingLocations(boxy.COLLECTION_ID, this._spawnInfo.collectionStart);
@@ -257,7 +363,7 @@ boxy.CollectiblesManager = class {
       var info = this._respawnQueue[i];
       info.timeToRespawn -= delta;
       // If the respawn time is up and boxy is not too close, then respawn
-      if (info.timeToRespawn <= 0 && !boxy.game.playerEntity.gridDistanceLessThan(info.rc, info.respawnDistance)) {
+      if (info.timeToRespawn <= 0 && !this._playerState.playerEntity.gridDistanceLessThan(info.rc, info.respawnDistance)) {
         this._respawnEntity(info.rc, info.spawnType);
         this._respawnQueue.splice(i, 1);
       } else {
@@ -290,7 +396,7 @@ boxy.CollectiblesManager = class {
     
     var spawnType = this._spawnMap[rc[0]][rc[1]];
     var typeName = boxy.COLLECTIBLE_NAMES[spawnType];
-    var typeInfo = boxy.game.settings.collectibles[typeName];
+    var typeInfo = boxy.COLLECTIBLE_TYPES[typeName];
     
     this._respawnQueue.push({
       timeToRespawn : typeInfo.respawnTime + ((Math.random() - 0.5) * 0.4 * typeInfo.respawnTime),
@@ -332,7 +438,7 @@ boxy.CollectiblesManager = class {
       return false;
     }
 
-    var playerLoc = boxy.game.playerEntity.rc;
+    var playerLoc = this._playerState.playerEntity.rc;
     return !(playerLoc[0] == row && playerLoc[1] == column);
   }
 
@@ -431,8 +537,8 @@ boxy.CollectiblesManager = class {
 }
 ;
 boxy.MobileEntity = class extends boxy.MapEntity {
-  constructor(rc, speed, sprite, spritePrefix) {
-    super(rc, sprite);
+  constructor(rc, speed, sprite, spritePrefix, stageMap) {
+    super(rc, sprite, stageMap);
     this._speed = speed;
     this._computedSpeed = speed;
     this._stopTimer = 0;
@@ -511,6 +617,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   
   changeAnimation(animation) {
     this._sprite.gotoAndPlay(this._spritePrefix + animation);
+    return this;
   }
 
   update() {
@@ -577,19 +684,19 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       switch (this.currentDirection) {
         case 0:
           newY -= speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
+          newGrid = this._stageMap.coordinateToGrid([newX, newY]);
           break;
         case 1:
           newX += speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
+          newGrid = this._stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
           break;
         case 2:
           newY += speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
+          newGrid = this._stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
           break;
         case 3:
           newX -= speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
+          newGrid = this._stageMap.coordinateToGrid([newX, newY]);
           break;
       }
 
@@ -600,7 +707,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       // Retrieve or compute the next direction if one is provided
       var nextDirection = this.nextDirection;
 
-      var dirs = boxy.game.stageMap.allowedDirections(this._rc);
+      var dirs = this._stageMap.allowedDirections(this._rc);
       if (nextDirection != null) {
         // make sure that the selected direction is allowed
         if (dirs.indexOf(nextDirection) != -1) {
@@ -667,8 +774,8 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   }
 };
 boxy.GhostEntity = class extends boxy.MobileEntity {
-  constructor(rc, speed, sprite, spritePrefix) {
-    super(rc, speed, sprite, spritePrefix);
+  constructor(rc, speed, sprite, spritePrefix, stageMap) {
+    super(rc, speed, sprite, spritePrefix, stageMap);
     this._eatenTime = 0;
   }
   
@@ -690,7 +797,7 @@ boxy.GhostEntity = class extends boxy.MobileEntity {
       return this._nextDirection;
     }
 
-    var dirs = boxy.game.stageMap.allowedDirections(this._rc);
+    var dirs = this._stageMap.allowedDirections(this._rc);
 
     if (this._currentDirection == null) {
       var randomDir = Math.floor(Math.random() * dirs.length);
@@ -894,13 +1001,33 @@ boxy.SpriteFactory = class {
   constructor(loader, stage) {
     this._loader = loader;
     this._stage = stage;
+    this._spritesheetsInitialized = false;
   }
 
   init() {
     this._generateSpritesheets();
+    this.addContainers();
+  }
+  
+  // Removes all displayed elements, except for the background
+  resetAll() {
+    this._mapTilesContainer.removeAllChildren();
+    this._mapTilesContainer.alpha = 1;
+    this._textContainer.removeAllChildren();
+    this._textContainer.alpha = 1;
+    this._collectiblesContainer.removeAllChildren();
+    this._collectiblesContainer.alpha = 1;
+    this._ghostContainer.removeAllChildren();
+    this._ghostContainer.alpha = 1;
+    this._boxyContainer.removeAllChildren();
+    this._boxyContainer.alpha = 1;
   }
 
   _generateSpritesheets() {
+    if (this._spritesheetsInitialized) {
+      return;
+    }
+    
     this._boxySheet = new createjs.SpriteSheet({
         framerate: 6,
         "images": [this._loader.getResult("boxy_sprite")],
@@ -930,7 +1057,6 @@ boxy.SpriteFactory = class {
           }
         }
       });
-    this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
     
     this._ghostSheet = new createjs.SpriteSheet({
         framerate: 2,
@@ -965,14 +1091,12 @@ boxy.SpriteFactory = class {
           "mol_eaten": 19
         }
       });
-    this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
 
     this._mapTilesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("map_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
       });
-    this._mapTilesContainer = new createjs.SpriteContainer(this._mapTilesSheet);
 
     this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
@@ -1008,6 +1132,15 @@ boxy.SpriteFactory = class {
           "disk": 26
         }
       });
+  }
+  
+  addContainers() {
+    this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
+    
+    this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
+    
+    this._mapTilesContainer = new createjs.SpriteContainer(this._mapTilesSheet);
+    
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
 
     this._textContainer = new createjs.Container();
@@ -1017,6 +1150,17 @@ boxy.SpriteFactory = class {
     // Add containers to the stage in render order
     this._stage.addChild(this._backgroundContainer, this._mapTilesContainer, this._textContainer,
       this._collectiblesContainer, this._ghostContainer, this._boxyContainer);
+  }
+  
+  get containers() {
+    return {
+      background : this._backgroundContainer,
+      mapTiles : this._mapTilesContainer,
+      text : this._textContainer,
+      collectibles : this._collectiblesContainer,
+      ghosts : this._ghostContainer,
+      boxy : this._boxyContainer
+    };
   }
   
   createBackground(xy, wh, color) {
@@ -1068,8 +1212,8 @@ boxy.SpriteFactory = class {
     return sprite;
   }
 
-  createText(value) {
-    var text = new createjs.Text(value, "48px silkscreen", "#FFFFFF");
+  createText(value, color = "#FFFFFF", size = 48) {
+    var text = new createjs.Text(value, size + "px silkscreen", color);
     text.textBaseline = "alphabetic";
     this._textContainer.addChild(text);
     return text;
@@ -1098,7 +1242,7 @@ boxy.MapEntityFactory = class {
   addBoxy(rc, speed) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createBoxySprite(xy);
-    var entity = new boxy.MobileEntity(rc, speed, sprite);
+    var entity = new boxy.MobileEntity(rc, speed, sprite, null, this._stageMap);
     this._entityManager.register(entity);
     entity.collisionRadiusRatio = 0.9;
     return entity;
@@ -1107,7 +1251,7 @@ boxy.MapEntityFactory = class {
   addFolder(rc, color) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createFolderSprite(xy, color);
-    var entity = new boxy.CollectibleEntity(rc, "folder", null, color, sprite);
+    var entity = new boxy.CollectibleEntity(rc, "folder", null, color, sprite, this._stageMap);
     entity.collisionRadiusRatio = 0.1;
     this._entityManager.register(entity);
     return entity;
@@ -1116,7 +1260,7 @@ boxy.MapEntityFactory = class {
   addCollection(rc, format, color) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createCollectionSprite(xy, format, color);
-    var entity = new boxy.CollectibleEntity(rc, "collection", format, color, sprite);
+    var entity = new boxy.CollectibleEntity(rc, "collection", format, color, sprite, this._stageMap);
     entity.collisionRadiusRatio = 0.6;
     this._entityManager.register(entity);
     return entity;
@@ -1125,7 +1269,7 @@ boxy.MapEntityFactory = class {
   addDisk(rc) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createDiskSprite(xy);
-    var entity = new boxy.CollectibleEntity(rc, "disk", null, null, sprite);
+    var entity = new boxy.CollectibleEntity(rc, "disk", null, null, sprite, this._stageMap);
     entity.collisionRadiusRatio = 0.7;
     this._entityManager.register(entity);
     return entity;
@@ -1153,7 +1297,7 @@ boxy.MapEntityFactory = class {
     if (ghostIdentity == 0) {
       prefix = "i_";
     }
-    var entity = new boxy.GhostEntity(rc, speed, sprite, prefix);
+    var entity = new boxy.GhostEntity(rc, speed, sprite, prefix, this._stageMap);
     this._entityManager.register(entity);
     entity.collisionRadiusRatio = 0.9;
     return entity;
@@ -1274,14 +1418,24 @@ boxy.MapEntityManager = class {
 boxy.PlayerState = class {
   constructor(startingCapacity) {
     this._score = 0;
+    this._numFiles = 0;
+    this._files = 0;
     this._diskUsage = 0;
     this._diskCapacity = startingCapacity;
     this._sprintCooldown = 0;
     this._sprintTime = 0;
   }
   
+  set playerEntity(playerEntity) {
+    this._playerEntity = playerEntity;
+  }
+  
+  get playerEntity() {
+    return this._playerEntity;
+  }
+  
   get sprintReady() {
-    return this._sprintCooldown <= 0;
+    return this._sprintCooldown <= 0 && this._sprintTime <= 0;
   }
   
   set sprintCooldown(time) {
@@ -1294,10 +1448,19 @@ boxy.PlayerState = class {
   
   set sprintTime(time) {
     this._sprintTime = time;
+    this._sprintInitialTime = time;
+  }
+  
+  get sprintPercentRemaining() {
+    return this._sprintTime / this._sprintInitialTime;
   }
   
   get score() {
     return this._score;
+  }
+  
+  get numberOfFiles() {
+    return this._numFiles;
   }
   
   get diskUsage() {
@@ -1312,7 +1475,7 @@ boxy.PlayerState = class {
     if (!this.sprintReady) {
       this._sprintCooldown -= boxy.game.tick.delta;
       if (this._sprintCooldown < 0) {
-        console.log("Sprint is ready!");
+        boxy.game.eventHandler.sprintEvent("ready");
         this._sprintCooldown = 0;
       }
     }
@@ -1320,14 +1483,14 @@ boxy.PlayerState = class {
     if (this.isSprinting) {
       this._sprintTime -= boxy.game.tick.delta;
       if (this._sprintTime <= 0) {
-        boxy.game.eventHandler.sprintEnd();
+        boxy.game.eventHandler.sprintEvent("end");
       }
     }
   }
 
   adjustStats(stats, subtract) {
     if (boxy.isString(stats)) {
-      stats = boxy.game.settings.collectibles[stats];
+      stats = boxy.STAT_VALUES[stats];
     }
     
     if (stats.score) {
@@ -1339,10 +1502,71 @@ boxy.PlayerState = class {
     if (stats.capacity) {
       this._diskCapacity += (subtract? -1 : 1) * stats.capacity;
     }
+    if (stats.files) {
+      this._numFiles += (subtract? -1 : 1) * stats.files;
+    }
+  }
+  
+  addToScore(value) {
+    this._score += value;
+  }
+};
+boxy.EventTracker = class {
+  constructor() {
+    this._collectedCounts ={};
+    this._ghostHits = 0;
+    this._ghostsEaten = 0;
+    this._sprintCount = 0;
+    this._itemsLost = 0;
+  }
+  
+  incrementCollected(collType) {
+    if (collType in this._collectedCounts) {
+      this._collectedCounts[collType] += 1;
+    } else {
+      this._collectedCounts[collType] = 1;
+    }
+  }
+  
+  get collectedCounts() {
+    return this._collectedCounts;
+  }
+  
+  incrementSprints() {
+    this._sprintCount++;
+  }
+  
+  get sprintCount() {
+    return this._sprintCount;
+  }
+  
+  incrementGhostHits() {
+    this._ghostHits++;
+  }
+  
+  get ghostHits() {
+    return this._ghostHits;
+  }
+  
+  incrementItemsLost(number) {
+    this._itemsLost += number;
+  }
+  
+  get itemsLost() {
+    return this._itemsLost;
+  }
+  
+  incrementGhostsEaten() {
+    this._ghostsEaten++;
+  }
+  
+  get ghostsEaten() {
+    return this._ghostsEaten;
   }
 };
 boxy.EventHandler = class {
   constructor() {
+    this._eventTracker = new boxy.EventTracker();
   }
   
   set levelState(levelState) {
@@ -1368,19 +1592,27 @@ boxy.EventHandler = class {
   set gameHud(gameHud) {
     this._gameHud = gameHud;
   }
+  
+  set spriteFactory(spriteFactory) {
+    this._spriteFactory = spriteFactory;
+  }
+  
+  set gameMode(mode) {
+    this._gameMode = mode;
+  }
 
   collisionEvent(data) {
     var collider = data.collider;
     var collidee = data.collidee;
 
-    if (collider === boxy.game.playerEntity) {
+    if (collider === this._playerState.playerEntity) {
       if (collidee instanceof boxy.CollectibleEntity) {
         this._collidePlayerAndCollectible(collider, collidee);
       }
     } else if (collider instanceof boxy.GhostEntity) {
       if (collidee instanceof boxy.GhostEntity) {
         this._collideGhostAndGhost(collider, collidee);
-      } else if (collidee === boxy.game.playerEntity) {
+      } else if (collidee === this._playerState.playerEntity) {
         this._collideGhostAndPlayer(collider, collidee);
       }
     }
@@ -1392,7 +1624,12 @@ boxy.EventHandler = class {
     case "folder" :
       this._entityManager.destroy(collidee);
       this._levelState.addToCollection(collidee);
-      this._playerState.adjustStats("folder");
+      var key = "folder";
+      if (collidee.format) {
+        key += "_" + collidee.format
+      }
+      this._playerState.adjustStats(key);
+      this._eventTracker.incrementCollected("folder");
       this._collectiblesManager.consume(collidee);
       break;
     case "collection" :
@@ -1404,6 +1641,7 @@ boxy.EventHandler = class {
     case "disk" :
       this._entityManager.destroy(collidee);
       this._playerState.adjustStats("disk");
+      this._eventTracker.incrementCollected("disk");
       this._collectiblesManager.consume(collidee);
       break;
     }
@@ -1433,6 +1671,7 @@ boxy.EventHandler = class {
     if (this._playerState.isSprinting) {
       ghost.eatenFor(boxy.GHOST_EATEN_TIME);
       this._playerState.adjustStats("ghost");
+      this._eventTracker.incrementGhostsEaten();
       return;
     }
     
@@ -1455,26 +1694,31 @@ boxy.EventHandler = class {
     player.blinkTime = difficulty.invincibleDuration;
     player.freezeTime = difficulty.freezeDuration;
     
+    this._eventTracker.incrementGhostHits();
+    this._eventTracker.incrementItemsLost(ejected.length);
+    
     console.log("Boxy lost the following items", ejected);
+  }
+  
+  sprintEvent(state) {
+    if (state == "start") {
+      console.log("Boxy sprint!");
+      this._playerState.sprintTime = boxy.SPRINT_DURATION;
+      this._playerState.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
+      this._eventTracker.incrementSprints();
+    } else if (state == "end") {
+      console.log("Sprint over, boxy can relax");
+      this._playerState.sprintTime = 0;
+      this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
+      this._playerState.playerEntity.resetSpeed();
+    }
+    this._gameHud.changeSprintState(state);
   }
   
   sprintRequested() {
     if (this._playerState.sprintReady) {
-      this.sprintStart();
+      this.sprintEvent("start");
     }
-  }
-  
-  sprintStart() {
-    console.log("Boxy sprint!");
-    this._playerState.sprintTime = boxy.SPRINT_DURATION;
-    boxy.game.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
-  }
-  
-  sprintEnd() {
-    console.log("Sprint over, boxy can relax");
-    this._playerState.sprintTime = 0;
-    this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
-    boxy.game.playerEntity.resetSpeed();
   }
   
   collectionRegistered(data) {
@@ -1488,7 +1732,7 @@ boxy.EventHandler = class {
     this._gameHud.addCollectionProgress(data);
   }
   
-  collectionCompleted(data) {
+  collectionRemoved(data, completed) {
     var colors = this._levelState.activeColors;
     var index = colors.indexOf(data.color);
     colors.splice(index, 1);
@@ -1497,11 +1741,40 @@ boxy.EventHandler = class {
     
     var folders = this._entityManager.getCollectiblesByType("folder");
     this._collectiblesManager.randomizeFolderColors(folders);
+    
+    this._gameHud.removeCollectionProgress(data);
+    
+    if (completed && this._levelState.hasReachedGoal()) {
+      this.levelComplete();
+    }
+  }
+  
+  startLevel() {
+    this._gameMode.unpause();
+    this._levelState.startTimer();
+  }
+  
+  levelComplete() {
+    var self = this;
+    
+    this._levelState.endTimer();
+    this._gameMode.pause();
+    this._playerState.playerEntity.changeAnimation("move_down");
+    var containers = this._spriteFactory.containers;
+    createjs.Tween.get(containers.ghosts).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.collectibles).wait(300).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.mapTiles).wait(500).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.text).wait(500).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.boxy).wait(1700).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4))
+      .call(function() {
+        boxy.game.switchToSummaryMode(self._playerState, self._levelState, self._eventTracker);
+      });
+    console.log("YOU ARE WINNER!");
+    
   }
 };
 boxy.GameHud = class {
   constructor() {
-    this._sizes = ['mb', 'gb', 'tb', 'pb'];
     this._collectionProgress = [];
   }
   
@@ -1513,16 +1786,22 @@ boxy.GameHud = class {
     this._spriteFactory = factory;
   }
   
+  set levelState(levelState) {
+    this._levelState = levelState;
+  }
+  
   set wh(wh) {
     this._wh = wh;
   }
 
   draw() {
+    // Render the players score
     this._scoreText = this._spriteFactory.createText("");
     this._scoreText.x = this._wh[0] - 10;
     this._scoreText.y = 50;
     this._scoreText.textAlign = "right";
 
+    // Draw the disk usage, disk cap display
     this._diskUsageText = this._spriteFactory.createText("");
     this._diskUsageText.x = this._wh[0] / 2;
     this._diskUsageText.y = 50;
@@ -1534,12 +1813,45 @@ boxy.GameHud = class {
     this._diskCapacityText.x = this._wh[0] / 2 + 30;
     this._diskCapacityText.y = 50;
     this._diskCapacityText.textAlign = "left";
+    
+    // Draw the total collection completion goal for the level
+    var goalOffset = 5;
+    this._levelGoalIcon = this._spriteFactory.createCollectionSprite([goalOffset, 0], null, "plain");
+    goalOffset += boxy.game.settings.grid_size * 1.5 + 10;
+    this._levelGoalProgressText = this._spriteFactory.createText("0");
+    this._levelGoalProgressText.x = goalOffset;
+    this._levelGoalProgressText.y = 50;
+    this._levelGoalProgressText.textAlign = "right"; 
+    this._levelGoalDivider = this._spriteFactory.createText("/");
+    this._levelGoalDivider.x = goalOffset;
+    this._levelGoalDivider.y = 50;
+    goalOffset += 30;
+    this._levelGoalTargetText = this._spriteFactory.createText(this._levelState.collectionGoal);
+    this._levelGoalTargetText.x = goalOffset;
+    this._levelGoalTargetText.y = 50;
+    this._levelGoalTargetText.textAlign = "left";
+    
+    this._sprintIndicatorText = this._spriteFactory.createText("");
+    this._sprintIndicatorText.x = this._wh[0] - 5;
+    this._sprintIndicatorText.y = this._wh[1] - 20;
+    this._sprintIndicatorText.textAlign = "right";
   }
 
   update() {
     this._scoreText.text = this._playerState.score;
-    this._diskUsageText.text = this._formatDiskUsage(this._playerState.diskUsage);
-    this._diskCapacityText.text = this._formatDiskUsage(this._playerState.diskCapacity);
+    this._diskUsageText.text = boxy.formatDiskUsage(this._playerState.diskUsage);
+    this._diskCapacityText.text = boxy.formatDiskUsage(this._playerState.diskCapacity);
+    this._levelGoalProgressText.text = this._levelState.completedCollectionsCount;
+    
+    if (this._playerState.isSprinting) {
+      var remaining = this._playerState.sprintPercentRemaining;
+      remaining = Math.floor(remaining * 10);
+      var dots = "";
+      for (var i = 0; i < remaining; i++) {
+        dots += ".";
+      }
+      this._sprintIndicatorText.text = dots;
+    }
     
     for (var i = 0; i < this._collectionProgress.length; i++) {
       var progress = this._collectionProgress[i];
@@ -1548,10 +1860,23 @@ boxy.GameHud = class {
     }
   }
   
+  changeSprintState(state) {
+    if (state == "ready") {
+      this._sprintIndicatorText.text = "Sprint ready!";
+      this._sprintIndicatorText.color = "#FFFFFF";
+      createjs.Tween.get(this._sprintIndicatorText).to({ scaleX : 1.1, scaleY : 1.1 }, 100, createjs.Ease.getPowInOut(4))
+          .to({ scaleX : 1, scaleY : 1 }, 100, createjs.Ease.getPowInOut(4));
+    } else if (state == "start") {
+      
+    } else if (state == "end") {
+      this._sprintIndicatorText.text = "recharging...";
+      this._sprintIndicatorText.color = "#7789E5";
+    }
+  }
+  
   addCollectionProgress(progress) {
     var offsetX = this._collectionProgress.length * 280;
     var offsetY = this._wh[1] - 20;
-    console.log("Offset", offsetX, offsetY);
     
     var collIcon = this._spriteFactory.createCollectionSprite(
         [offsetX, offsetY - 50], progress.collObj.format, progress.collObj.color);
@@ -1574,28 +1899,43 @@ boxy.GameHud = class {
     goalText.textAlign = "left";
     
     this._collectionProgress.push({
+      icon : collIcon,
       progressText : progressText,
       divider : divider,
       goalText : goalText,
       progressData : progress
     });
   }
-
-  _formatDiskUsage(bytes) {
-    if (bytes == 0) return '0b';
-    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1000)));
-    return Math.round(bytes / Math.pow(1000, i), 2) + this._sizes[i];
+  
+  removeCollectionProgress(progress) {
+    var index;
+    for (var i = 0; i < this._collectionProgress.length; i++) {
+      if (this._collectionProgress[i].progress === progress) {
+        index = i;
+        break;
+      }
+    }
+    
+    var hudProgress = this._collectionProgress.splice(index, 1)[0];
+    hudProgress.icon.parent.removeChild(hudProgress.icon);
+    hudProgress.progressText.parent.removeChild(hudProgress.progressText);
+    hudProgress.divider.parent.removeChild(hudProgress.divider);
+    hudProgress.goalText.parent.removeChild(hudProgress.goalText);
   }
+
+
 
 };
 // Tracks progress on the current level
 boxy.LevelState = class {
-  constructor(difficultyLevel) {
+  constructor(stageNumber, difficultyLevel) {
     this._collectionLimit = 2;
     this._completedCollections = [];
     // Active collections
     this._collections = [];
     this._difficultyLevel = difficultyLevel;
+    this._stageNumber = stageNumber;
+    this._levelSettings = boxy.STAGE_LEVELS[this._stageNumber];
     this._activeColors = ["plain"];
   }
   
@@ -1614,7 +1954,7 @@ boxy.LevelState = class {
         color : collection.color,
         collObj : collection,
         progress : 0,
-        goal : 10
+        goal : this._levelSettings.itemsPerCollection[collection.format]
       };
       
       this._collections.push(collEntry);
@@ -1632,12 +1972,11 @@ boxy.LevelState = class {
     var collection = this._collections[collectionIndex];
     if (collection != null) {
       collection.progress++;
-      console.log("Progress:", collection.color, collection.progress, "/", collection.goal);
       if (collection.progress >= collection.goal) {
         this._completedCollections.push(collection);
         this._collections.splice(collectionIndex, 1);
         
-        boxy.game.eventHandler.collectionCompleted(collection);
+        boxy.game.eventHandler.collectionRemoved(collection, true);
       }
     }
   }
@@ -1657,7 +1996,8 @@ boxy.LevelState = class {
           this._collections[index].progress--;
         } else {
           // Lost a collection, yikes!
-          this._collections.splice(index, 1);
+          var collection = this._collections.splice(index, 1)[0];
+          boxy.game.eventHandler.collectionRemoved(collection, false);
         }
       }
     }
@@ -1672,12 +2012,367 @@ boxy.LevelState = class {
     return -1;
   }
   
+  startTimer() {
+    this._levelTimer = new Date().getTime();
+  }
+  
+  endTimer() {
+    this._levelTimerEnd = new Date().getTime();
+  }
+  
+  get levelTime() {
+    if (this._levelTimerEnd) {
+      return this._levelTimerEnd - this._levelTimer;
+    }
+    return new Date().getTime() - this._levelTimer;
+  }
+  
   get collectionProgress() {
     return this._collections;
   }
   
   get activeColors() {
     return this._activeColors;
+  }
+  
+  get completedCollections() {
+    return this._completedCollections;
+  }
+  
+  get completedCollectionsCount() {
+    return this._completedCollections.length;
+  }
+  
+  get collectionGoal() {
+    return this._levelSettings.collectionGoal;
+  }
+  
+  hasReachedGoal() {
+    return this._completedCollections.length >= this._levelSettings.collectionGoal;
+  }
+  
+  getTimeScore(timeSeconds) {
+    var fromPar = this._levelSettings.timePar - timeSeconds;
+    if (fromPar <= 0) {
+      return 0;
+    }
+    return Math.floor((fromPar / this._levelSettings.timePar) * this._levelSettings.timeMaxScore);
+  }
+  
+  getSprintScore(sprintCount) {
+    var fromPar = this._levelSettings.sprintPar - sprintCount;
+    if (fromPar <= 0) {
+      return 0;
+    }
+    return Math.floor((fromPar / this._levelSettings.sprintPar) * this._levelSettings.sprintMaxScore);
+  }
+};
+boxy.GameMode = class {
+  constructor(settings) {
+    this._settings = settings;
+  }
+  
+  set spriteFactory(factory) {
+    this._spriteFactory = factory;
+  }
+  
+  set stage(stage) {
+    this._stage = stage;
+  }
+  
+  set loader(loader) {
+    this._loader = loader;
+  }
+  
+  init() {
+    this._entityManager = new boxy.MapEntityManager(this._stage);
+    var entityFactory = new boxy.MapEntityFactory();
+    
+    // Setup map manager
+    var mapData = {};
+    this._loader.getItems(true).forEach(function(loaded){
+      if (loaded.item.path == "maps/") {
+        mapData[loaded.item.id] = loaded.result;
+      }
+    });
+    var stageMap = new boxy.StageMap(mapData, this._spriteFactory, this._settings.grid_size,
+      this._settings.map_offset_x, this._settings.map_offset_top, this._settings.map_offset_bottom);
+    stageMap.selectMap("test_map").renderMap();
+    
+    // Rescale content to match ratio of the canvas
+    var mapDimensions = stageMap.mapDimensions;
+    var ratio = mapDimensions[0] / mapDimensions[1];
+    var windowRatio = boxy.game.w / boxy.game.h;
+    var scale = boxy.game.w / mapDimensions[0];
+    if (windowRatio > ratio) {
+        scale = boxy.game.h / mapDimensions[1];
+    }
+    this._stage.scaleX = this._stage.scaleY = scale;
+    
+    this._levelState = new boxy.LevelState(0, 0);
+    this._playerState = new boxy.PlayerState(this._settings.initial_capacity);
+
+    // Initialize the event handler
+    boxy.game.eventHandler = new boxy.EventHandler();
+
+    // initialize collectible items
+    this._collectiblesManager = new boxy.CollectiblesManager(stageMap, entityFactory);
+    this._collectiblesManager.folderColors = this._levelState.activeColors;
+    
+    this._gameHud = new boxy.GameHud();
+    
+    // Inject dependencies
+    boxy.game.eventHandler.collectiblesManager = this._collectiblesManager;
+    boxy.game.eventHandler.levelState = this._levelState;
+    boxy.game.eventHandler.entityManager = this._entityManager;
+    boxy.game.eventHandler.playerState = this._playerState;
+    boxy.game.eventHandler.gameHud = this._gameHud;
+    boxy.game.eventHandler.spriteFactory = this._spriteFactory;
+    boxy.game.eventHandler.gameMode = this;
+    
+    entityFactory.stage = this._stage;
+    entityFactory.stageMap = stageMap;
+    entityFactory.entityManager = this._entityManager;
+    entityFactory.spriteFactory = this._spriteFactory;
+
+    this._gameHud.spriteFactory = this._spriteFactory;
+    this._gameHud.playerState = this._playerState;
+    this._gameHud.levelState = this._levelState;
+    this._gameHud.wh = mapDimensions;
+    console.log("dims", mapDimensions);
+    this._gameHud.draw();
+    
+    boxy.game.dimensions = mapDimensions;
+    
+    // Setup game objects
+    // Initialize mobile game objects
+    var playerEntity = entityFactory.addBoxy([1, 1], 250);
+    entityFactory.addGhost([1, 10], 0);
+    entityFactory.addGhost([1, 8], 1);
+    entityFactory.addGhost([1, 6], 2);
+    entityFactory.addGhost([1, 4], 3);
+    
+    this._playerState.playerEntity = playerEntity;
+    
+    this._collectiblesManager.playerState = this._playerState;
+    this._collectiblesManager.spawnAll();
+  }
+  
+  tick(e) {
+    if (this._paused) {
+      return;
+    }
+    
+    this._playerState.update();
+    
+    this._entityManager.update();
+
+    this._gameHud.update();
+    
+    this._collectiblesManager.update();
+  }
+  
+  pause() {
+    this._paused = true;
+    return this;
+  }
+  
+  unpause() {
+    this._paused = false;
+    return this;
+  }
+  
+  handleKeyDown(e) {
+    //cross browser issues exist
+    if (!e) {
+      var e = window.event;
+    }
+    switch (e.keyCode) {
+      case boxy.KEYCODE_SPACE:
+        boxy.game.eventHandler.sprintRequested();
+        return false;
+      case boxy.KEYCODE_A:
+      case boxy.KEYCODE_LEFT:
+        this._playerState._playerEntity.nextDirection = 3;
+        return false;
+      case boxy.KEYCODE_D:
+      case boxy.KEYCODE_RIGHT:
+        this._playerState._playerEntity.nextDirection = 1;
+        return false;
+      case boxy.KEYCODE_W:
+      case boxy.KEYCODE_UP:
+        this._playerState._playerEntity.nextDirection = 0;
+        return false;
+      case boxy.KEYCODE_S:
+      case boxy.KEYCODE_DOWN:
+        this._playerState._playerEntity.nextDirection = 2;
+        return false;
+    }
+  }
+};
+boxy.LevelSummaryMode = class {
+  constructor() {
+    this._baseOffsetX = 10;
+    this._baseOffsetY = 5;
+    this._currentLine = 0;
+    this._lineHeight = 60;
+    this._currentLineX = 0;
+    this._labelColor = "#BBE0F0";
+    this._scoreColor = "#BBFFBB";
+    this._labelOffsetX = 300;
+    this._entities = [];
+  }
+  
+  set spriteFactory(factory) {
+    this._spriteFactory = factory;
+  }
+  
+  set stage(stage) {
+    this._stage = stage;
+  }
+  
+  set playerState(playerState) {
+    this._playerState = playerState;
+  }
+  
+  set levelState(levelState) {
+    this._levelState = levelState;
+  }
+  
+  set eventTracker(eventTracker) {
+    this._eventTracker = eventTracker;
+  }
+  
+  init() {
+    return this;
+  }
+  
+  draw() {
+    var diskUsage = boxy.formatDiskUsage(this._playerState.diskUsage);
+    var diskScore = Math.floor(this._playerState.diskUsage * boxy.SCORE_DISK_USAGE_MULTIPLIER);
+    
+    var diskCapacity = boxy.formatDiskUsage(this._playerState.diskCapacity);
+    
+    var levelTime = Math.floor(this._levelState.levelTime / 1000);
+    var timeMinutes = Math.floor(levelTime / 60);
+    var timeSeconds = levelTime % 60;
+    if (timeSeconds < 10) {
+      timeSeconds = "0" + timeSeconds;
+    }
+    
+    var timeScore = this._levelState.getTimeScore(levelTime);
+    var sprintScore = this._levelState.getSprintScore(this._eventTracker.sprintCount);
+    
+    // Modify score for post game bonuses
+    var levelScore = this._playerState.score;
+    var bonuses = timeScore + sprintScore + diskScore;
+    this._playerState.addToScore(bonuses);
+    
+    this.newLine()
+      .text("Level Complete!", "#FFCF40", "66").newLine()
+      .label("Time").text(timeMinutes + ":" + timeSeconds).scoreIncrease(timeScore).newLine()
+      .label("Sprints").text(this._eventTracker.sprintCount).scoreIncrease(sprintScore).newLine()
+      .label("Disk").text(diskUsage + " / " + diskCapacity).scoreIncrease(diskScore).newLine()
+      .label("Files").text(this._playerState.numberOfFiles).newLine()
+      .label("Completed")
+      .renderCollectionFormats(this._summarizeCollections(this._levelState.completedCollections)).newLine()
+      .label("Danger").text("Hit " + this._eventTracker.ghostHits + " times (" 
+        + this._eventTracker.itemsLost + " items lost)").newLine()
+      .text("-----------------------------", "#FFCF40").newLine()
+      .label("Score").text(levelScore).scoreIncrease(bonuses).text(" = ").text(this._playerState.score).newLine();
+    
+    this._continuePrompts();
+    return this;
+  }
+  
+  _continuePrompts() {
+    var text = this._spriteFactory.createText("Space to continue, Q to quit", "#FFCF40");
+    text.x = boxy.game.dimensions[0] - 10;
+    text.y = boxy.game.dimensions[1] - 30;
+    text.textAlign = "right";
+  }
+  
+  get _lineOffset() {
+    return this._currentLine * this._lineHeight + this._baseOffsetY;
+  }
+  
+  label(label) {
+    var labelText = this._spriteFactory.createText(label, null, 38);
+    labelText.x = this._labelOffsetX;
+    labelText.y = this._lineOffset;
+    labelText.color = this._labelColor;
+    labelText.textAlign = "right";
+    this._currentLineX = labelText.x + 20;
+    this._entities.push(labelText);
+    return this;
+  }
+  
+  text(textValue, color, size = 38) {
+    var text = this._spriteFactory.createText(textValue, color, size);
+    text.x = this._currentLineX;
+    text.y = this._lineOffset;
+    this._entities.push(text);
+    this._currentLineX += text.getBounds().width;
+    return this;
+  }
+  
+  scoreIncrease(value) {
+    if (value == 0) {
+      return this;
+    }
+    this._currentLineX += 20;
+    this.text("+" + value, this._scoreColor);
+    return this;
+  }
+  
+  newLine() {
+    this._currentLineX = this._baseOffsetX;
+    this._currentLine++;
+    return this;
+  }
+  
+  collectionSprite(format, color) {
+    var sprite = this._spriteFactory.createCollectionSprite(
+        [this._currentLineX, this._lineOffset - boxy.game.settings.grid_size * 0.75], format, color);
+    this._currentLineX += boxy.game.settings.grid_size / 2;
+    return this;
+  }
+  
+  spacing(value) {
+    this._currentLineX += value;
+    return this;
+  }
+  
+  _summarizeCollections(collections) {
+    var formats = {};
+    
+    for (var i = 0; i < collections.length; i++) {
+      var collection = collections[i];
+      var format = collection.collObj.format;
+      if (format in formats) {
+        formats[format] += 1;
+      } else {
+        formats[format] = 1;
+      }
+    }
+    
+    return formats;
+  }
+  
+  renderCollectionFormats(formatMap) {
+    for (var format in formatMap) {
+      var value = formatMap[format];
+      this.collectionSprite(format, "blue").spacing(20).text(" x " + value).spacing(25);
+    }
+    return this;
+  }
+  
+  tick(e) {
+    
+  }
+  
+  handleKeyDown(e) {
+    
   }
 };
 boxy.indexOfPair = function(array, pair) {
@@ -1688,15 +2383,15 @@ boxy.indexOfPair = function(array, pair) {
     }
   }
   return -1;
-}
+};
 
 boxy.calculateMoveDelta = function(speed) {
   return boxy.game.tick.delta / 1000 * speed;
-}
+};
 
 boxy.isString = function(value) {
   return typeof value === 'string' || value instanceof String;
-}
+};
 
 boxy.arrayDifference = function(a1, a2) {
   var result = [];
@@ -1707,6 +2402,13 @@ boxy.arrayDifference = function(a1, a2) {
   }
   return result;
 };
+
+boxy.formatDiskUsage = function(bytes) {
+  if (bytes == 0) return '0b';
+  var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1000)));
+  return Math.round(bytes / Math.pow(1000, i), 2) + boxy.FILE_SIZE_SUFFIXES[i];
+};
+;
 boxy.defaults = {
   idle_time: 40,
   grid_size: 70,
@@ -1714,62 +2416,16 @@ boxy.defaults = {
   initial_capacity: 10000,
   map_offset_top : 60,
   map_offset_bottom : 60,
-  map_offset_x : 5,
-  collectibles : {
-    folder : {
-      score : 5,
-      disk : 1,
-      respawnDistance : 3,
-      respawnTime : 10000
-    },
-    collection : {
-      score : 100,
-      disk : 1,
-      respawnDistance : 5,
-      respawnTime : 40000
-    },
-    disk : {
-      score : 50,
-      disk : 0,
-      capacity : 20000,
-      respawnDistance : 5,
-      respawnTime : 40000
-    },
-    ghost : {
-      score : 20
-    }
-  }
+  map_offset_x : 5
 };
 
 boxy.game = (function () {
-  var KEYCODE_DOWN = 40;
-  var KEYCODE_UP = 38;
-  var KEYCODE_LEFT = 37;
-  var KEYCODE_RIGHT = 39;
-  var KEYCODE_W = 87;
-  var KEYCODE_A = 65;
-  var KEYCODE_D = 68;
-  var KEYCODE_S = 83;
-
-  var KEYCODE_SPACE = 32;
-
   var stage, w, h;
   var loader;
 
   var spriteFactory;
-  var entityFactory;
   
-  var entityManager;
-  var collectiblesManager;
-  
-  var gameHud;
-
-  var stageMap;
-  var levelState;
-  var playerState;
-
-  var mobileEntities;
-  var playerEntity;
+  var mode;
 
   document.onkeydown = handleKeyDown;
 
@@ -1777,9 +2433,9 @@ boxy.game = (function () {
   game.settings = boxy.defaults;
 
   game.init = function() {
-    this.stage = new createjs.Stage("boxyCanvas", false, false);
-    this.w = this.stage.canvas.width;
-    this.h = this.stage.canvas.height;
+    stage = new createjs.Stage("boxyCanvas", false, false);
+    this.w = stage.canvas.width;
+    this.h = stage.canvas.height;
 
     manifest = [
         {src : "boxy_spritesheet.png", id : "boxy_sprite"},
@@ -1795,91 +2451,44 @@ boxy.game = (function () {
     loader.addEventListener("complete", handleComplete);
     loader.loadManifest(manifest, true, "art/");
     loader.loadManifest(mapsManifest, true, "maps/");
-  }
+  };
+  
+  game.switchToSummaryMode = function(playerState, levelState, eventTracker) {
+    spriteFactory.resetAll();
+    
+    mode = new boxy.LevelSummaryMode();
+    mode.spriteFactory = spriteFactory;
+    mode.stage = stage;
+    mode.playerState = playerState;
+    mode.levelState = levelState;
+    mode.eventTracker = eventTracker;
+    
+    mode.init().draw();
+  };
 
-  function handleComplete(eventx) {
-    spriteFactory = new boxy.SpriteFactory(loader, game.stage);
+  function handleComplete(event) {
+    spriteFactory = new boxy.SpriteFactory(loader, stage);
     spriteFactory.init();
-    entityManager = new boxy.MapEntityManager(game.stage);
-    entityFactory = new boxy.MapEntityFactory(entityManager, spriteFactory, game.stage, game.stageMap);
     
-    // Setup map manager
-    mapData = {};
-    loader.getItems(true).forEach(function(loaded){
-      if (loaded.item.path == "maps/") {
-        mapData[loaded.item.id] = loaded.result;
-      }
-    });
-    game.stageMap = new boxy.StageMap(mapData, spriteFactory, game.settings.grid_size,
-      game.settings.map_offset_x, game.settings.map_offset_top, game.settings.map_offset_bottom);
-    game.stageMap.selectMap("test_map").renderMap();
+    mode = new boxy.GameMode(game.settings);
+    mode.spriteFactory = spriteFactory;
+    mode.stage = stage;
+    mode.loader = loader;
     
-    // Rescale content to match ratio of the canvas
-    var mapDimensions = game.stageMap.mapDimensions;
-    var ratio = mapDimensions[0] / mapDimensions[1];
-    var windowRatio = game.w / game.h;
-    var scale = game.w / mapDimensions[0];
-    if (windowRatio > ratio) {
-        scale = game.h / mapDimensions[1];
-    }
-    game.stage.scaleX = game.stage.scaleY = scale;
-    
-    levelState = new boxy.LevelState(0);
-    playerState = new boxy.PlayerState(game.settings.initial_capacity);
-
-    // Initialize the event handler
-    game.eventHandler = new boxy.EventHandler();
-
-    // initialize collectible items
-    collectiblesManager = new boxy.CollectiblesManager(game.stageMap, entityFactory);
-    collectiblesManager.folderColors = levelState.activeColors;
-    
-    gameHud = new boxy.GameHud();
-    
-    // Inject dependencies
-    game.eventHandler.collectiblesManager = collectiblesManager;
-    game.eventHandler.levelState = levelState;
-    game.eventHandler.entityManager = entityManager;
-    game.eventHandler.playerState = playerState;
-    game.eventHandler.gameHud = gameHud;
-    
-    entityFactory.stage = game.stage;
-    entityFactory.stageMap = game.stageMap;
-    entityFactory.entityManager = entityManager;
-    entityFactory.spriteFactory = spriteFactory;
-
-    gameHud.spriteFactory = spriteFactory;
-    gameHud.playerState = playerState;
-    gameHud.wh = mapDimensions;
-    gameHud.draw();
-    
-    // Setup game objects
-    // Initialize mobile game objects
-    game.mobileEntities = [];
-    game.playerEntity = entityFactory.addBoxy([1, 1], 250);
-    entityFactory.addGhost([1, 10], 0);
-    entityFactory.addGhost([1, 8], 1);
-    entityFactory.addGhost([1, 6], 2);
-    entityFactory.addGhost([1, 4], 3);
-    
-    collectiblesManager.spawnAll();
+    mode.init();
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
+    
+    boxy.game.eventHandler.startLevel();
   }
 
   function tick(event) {
     game.tick = event;
     
-    playerState.update();
+    mode.tick(event);
     
-    entityManager.update();
-
-    gameHud.update();
-    
-    collectiblesManager.update();
-
-    game.stage.update(event);
+    stage.update(event);
   }
 
   function handleKeyDown(e) {
@@ -1887,29 +2496,8 @@ boxy.game = (function () {
     if (!e) {
       var e = window.event;
     }
-    switch (e.keyCode) {
-      case KEYCODE_SPACE:
-        game.eventHandler.sprintRequested();
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      case KEYCODE_A:
-      case KEYCODE_LEFT:
-        game.playerEntity.nextDirection = 3;
-        return false;
-      case KEYCODE_D:
-      case KEYCODE_RIGHT:
-        game.playerEntity.nextDirection = 1;
-        return false;
-      case KEYCODE_W:
-      case KEYCODE_UP:
-        game.playerEntity.nextDirection = 0;
-        return false;
-      case KEYCODE_S:
-      case KEYCODE_DOWN:
-        game.playerEntity.nextDirection = 2;
-        return false;
-    }
+    
+    return mode.handleKeyDown(e);
   }
 
   return game;
