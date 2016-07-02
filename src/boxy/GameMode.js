@@ -15,20 +15,26 @@ boxy.GameMode = class {
     this._loader = loader;
   }
   
+  set mapsData(mapsData) {
+    this._mapsData = mapsData;
+  }
+  
+  set levelsData(levelsData) {
+    this._levelsData  = levelsData;
+  }
+  
+  set levelNumber(levelNumber) {
+    this._levelNumber = levelNumber;
+  }
+  
   init() {
     this._entityManager = new boxy.MapEntityManager(this._stage);
     var entityFactory = new boxy.MapEntityFactory();
     
     // Setup map manager
-    var mapData = {};
-    this._loader.getItems(true).forEach(function(loaded){
-      if (loaded.item.path == "maps/") {
-        mapData[loaded.item.id] = loaded.result;
-      }
-    });
-    var stageMap = new boxy.StageMap(mapData, this._spriteFactory, this._settings.grid_size,
+    var stageMap = new boxy.StageMap(this._mapsData, this._spriteFactory, this._settings.grid_size,
       this._settings.map_offset_x, this._settings.map_offset_top, this._settings.map_offset_bottom);
-    stageMap.selectMap("test_map").renderMap();
+    stageMap.selectMap(this._levelNumber).renderMap();
     
     // Rescale content to match ratio of the canvas
     var mapDimensions = stageMap.mapDimensions;
@@ -40,7 +46,7 @@ boxy.GameMode = class {
     }
     this._stage.scaleX = this._stage.scaleY = scale;
     
-    this._levelState = new boxy.LevelState(0, 0);
+    this._levelState = new boxy.LevelState(this._levelsData[this._levelNumber], 0, 0);
     this._playerState = new boxy.PlayerState(this._settings.initial_capacity);
 
     // Initialize the event handler
@@ -70,7 +76,6 @@ boxy.GameMode = class {
     this._gameHud.playerState = this._playerState;
     this._gameHud.levelState = this._levelState;
     this._gameHud.wh = mapDimensions;
-    console.log("dims", mapDimensions);
     this._gameHud.draw();
     
     boxy.game.dimensions = mapDimensions;

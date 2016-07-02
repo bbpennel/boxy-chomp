@@ -85,50 +85,6 @@ boxy.DIFFICULTY_LEVELS = {
   }
 };
 
-boxy.STAGE_LEVELS = [
-  {
-    collectionGoal : 2,
-    itemsPerCollection : {
-      text : 15,
-      image : 10,
-      audio : 5,
-      data : 3
-    },
-    "spawnInfo" : {
-      "collectionMaxConcurrent" : 2,
-      "collectionCount" : 3,
-      "collectionStart" : 2,
-      "collectionTypes" : ["text", "image"],
-      "collectionSpawnChance" : 0.50,
-      "diskStart" : 0,
-      "diskMaxConcurrent" : 1,
-      "collectionSpawnChance" : 0.20
-    },
-    sprintPar : 10,
-    sprintMaxScore : 1000,
-    timePar : 90,
-    timeMaxScore : 1000
-  },
-  {
-    collectionGoal : 3,
-    itemsPerCollection : {
-      text : 15,
-      image : 10,
-      audio : 5,
-      data : 3
-    }
-  },
-  {
-    collectionGoal : 4,
-    itemsPerCollection : {
-      text : 18,
-      image : 12,
-      audio : 7,
-      data : 4
-    }
-  }
-];
-
 boxy.SPRINT_COOLDOWN = 8000;
 boxy.SPRINT_DURATION = 2000;
 boxy.SPRINT_SPEED_MULTIPLIER = 2;

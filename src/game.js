@@ -1,7 +1,7 @@
 boxy.defaults = {
   idle_time: 40,
   grid_size: 70,
-  map_file: "test.json",
+  map_file: "maps.json",
   initial_capacity: 10000,
   map_offset_top : 60,
   map_offset_bottom : 60,
@@ -13,6 +13,7 @@ boxy.game = (function () {
   var loader;
 
   var spriteFactory;
+  var mapsData, levelsData;
   
   var mode;
 
@@ -33,13 +34,14 @@ boxy.game = (function () {
         {src : "collectibles_spritesheet.png", id : "collectibles_sprite"},
         {src : "slkscr.ttf", id : "font_ttf"}
     ];
-    mapsManifest = [
-      {src : "test.json", id : "test_map"}
+    dataManifest = [
+      {src : "maps.json", id : "mapsData"},
+      {src : "levels.json", id : "levelsData"}
     ];
     loader = new createjs.LoadQueue(false);
     loader.addEventListener("complete", handleComplete);
     loader.loadManifest(manifest, true, "art/");
-    loader.loadManifest(mapsManifest, true, "maps/");
+    loader.loadManifest(dataManifest, true, "data/");
   };
   
   game.switchToSummaryMode = function(playerState, levelState, eventTracker) {
@@ -56,6 +58,9 @@ boxy.game = (function () {
   };
 
   function handleComplete(event) {
+    mapsData = loader.getResult("mapsData");
+    levelsData = loader.getResult("levelsData");
+    
     spriteFactory = new boxy.SpriteFactory(loader, stage);
     spriteFactory.init();
     
@@ -63,6 +68,9 @@ boxy.game = (function () {
     mode.spriteFactory = spriteFactory;
     mode.stage = stage;
     mode.loader = loader;
+    mode.mapsData = mapsData;
+    mode.levelsData = levelsData;
+    mode.levelNumber = 0;
     
     mode.init();
 
