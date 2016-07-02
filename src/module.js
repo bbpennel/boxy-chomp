@@ -94,6 +94,16 @@ boxy.STAGE_LEVELS = [
       audio : 5,
       data : 3
     },
+    "spawnInfo" : {
+      "collectionMaxConcurrent" : 2,
+      "collectionCount" : 3,
+      "collectionStart" : 2,
+      "collectionTypes" : ["text", "image"],
+      "collectionSpawnChance" : 0.50,
+      "diskStart" : 0,
+      "diskMaxConcurrent" : 1,
+      "collectionSpawnChance" : 0.20
+    },
     sprintPar : 10,
     sprintMaxScore : 1000,
     timePar : 90,

@@ -47,7 +47,7 @@ boxy.GameMode = class {
     boxy.game.eventHandler = new boxy.EventHandler();
 
     // initialize collectible items
-    this._collectiblesManager = new boxy.CollectiblesManager(stageMap, entityFactory);
+    this._collectiblesManager = new boxy.CollectiblesManager(stageMap, this._levelState.spawnInfo, entityFactory);
     this._collectiblesManager.folderColors = this._levelState.activeColors;
     
     this._gameHud = new boxy.GameHud();

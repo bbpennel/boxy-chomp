@@ -1,7 +1,7 @@
 boxy.CollectiblesManager = class {
-  constructor(stageMap, entityFactory) {
+  constructor(stageMap, spawnInfo, entityFactory) {
     this._spawnMap = stageMap.spawnMap;
-    this._spawnInfo = stageMap.spawnInfo;
+    this._spawnInfo = spawnInfo;
     this._stageMap = stageMap;
     this._entityFactory = entityFactory;
     this._consumedQueue = [];

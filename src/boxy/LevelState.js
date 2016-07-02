@@ -8,11 +8,16 @@ boxy.LevelState = class {
     this._difficultyLevel = difficultyLevel;
     this._stageNumber = stageNumber;
     this._levelSettings = boxy.STAGE_LEVELS[this._stageNumber];
+    this._spawnInfo = this._levelSettings.spawnInfo;
     this._activeColors = ["plain"];
   }
   
   get difficultyLevel() {
     return this._difficultyLevel;
+  }
+
+  get spawnInfo() {
+    return this._spawnInfo;
   }
   
   registerCollection(collection) {
