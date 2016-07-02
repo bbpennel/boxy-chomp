@@ -1,11 +1,13 @@
 // Tracks progress on the current level
 boxy.LevelState = class {
-  constructor(difficultyLevel) {
+  constructor(stageNumber, difficultyLevel) {
     this._collectionLimit = 2;
     this._completedCollections = [];
     // Active collections
     this._collections = [];
     this._difficultyLevel = difficultyLevel;
+    this._stageNumber = stageNumber;
+    this._levelSettings = boxy.STAGE_LEVELS[this._stageNumber];
     this._activeColors = ["plain"];
   }
   
@@ -24,7 +26,7 @@ boxy.LevelState = class {
         color : collection.color,
         collObj : collection,
         progress : 0,
-        goal : 10
+        goal : this._levelSettings.itemsPerCollection[collection.format]
       };
       
       this._collections.push(collEntry);
@@ -42,12 +44,11 @@ boxy.LevelState = class {
     var collection = this._collections[collectionIndex];
     if (collection != null) {
       collection.progress++;
-      console.log("Progress:", collection.color, collection.progress, "/", collection.goal);
       if (collection.progress >= collection.goal) {
         this._completedCollections.push(collection);
         this._collections.splice(collectionIndex, 1);
         
-        boxy.game.eventHandler.collectionCompleted(collection);
+        boxy.game.eventHandler.collectionRemoved(collection, true);
       }
     }
   }
@@ -67,7 +68,8 @@ boxy.LevelState = class {
           this._collections[index].progress--;
         } else {
           // Lost a collection, yikes!
-          this._collections.splice(index, 1);
+          var collection = this._collections.splice(index, 1)[0];
+          boxy.game.eventHandler.collectionRemoved(collection, false);
         }
       }
     }
@@ -82,11 +84,58 @@ boxy.LevelState = class {
     return -1;
   }
   
+  startTimer() {
+    this._levelTimer = new Date().getTime();
+  }
+  
+  endTimer() {
+    this._levelTimerEnd = new Date().getTime();
+  }
+  
+  get levelTime() {
+    if (this._levelTimerEnd) {
+      return this._levelTimerEnd - this._levelTimer;
+    }
+    return new Date().getTime() - this._levelTimer;
+  }
+  
   get collectionProgress() {
     return this._collections;
   }
   
   get activeColors() {
     return this._activeColors;
+  }
+  
+  get completedCollections() {
+    return this._completedCollections;
+  }
+  
+  get completedCollectionsCount() {
+    return this._completedCollections.length;
+  }
+  
+  get collectionGoal() {
+    return this._levelSettings.collectionGoal;
+  }
+  
+  hasReachedGoal() {
+    return this._completedCollections.length >= this._levelSettings.collectionGoal;
+  }
+  
+  getTimeScore(timeSeconds) {
+    var fromPar = this._levelSettings.timePar - timeSeconds;
+    if (fromPar <= 0) {
+      return 0;
+    }
+    return Math.floor((fromPar / this._levelSettings.timePar) * this._levelSettings.timeMaxScore);
+  }
+  
+  getSprintScore(sprintCount) {
+    var fromPar = this._levelSettings.sprintPar - sprintCount;
+    if (fromPar <= 0) {
+      return 0;
+    }
+    return Math.floor((fromPar / this._levelSettings.sprintPar) * this._levelSettings.sprintMaxScore);
   }
 }

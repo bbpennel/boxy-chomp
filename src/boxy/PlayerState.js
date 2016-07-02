@@ -1,14 +1,24 @@
 boxy.PlayerState = class {
   constructor(startingCapacity) {
     this._score = 0;
+    this._numFiles = 0;
+    this._files = 0;
     this._diskUsage = 0;
     this._diskCapacity = startingCapacity;
     this._sprintCooldown = 0;
     this._sprintTime = 0;
   }
   
+  set playerEntity(playerEntity) {
+    this._playerEntity = playerEntity;
+  }
+  
+  get playerEntity() {
+    return this._playerEntity;
+  }
+  
   get sprintReady() {
-    return this._sprintCooldown <= 0;
+    return this._sprintCooldown <= 0 && this._sprintTime <= 0;
   }
   
   set sprintCooldown(time) {
@@ -21,10 +31,19 @@ boxy.PlayerState = class {
   
   set sprintTime(time) {
     this._sprintTime = time;
+    this._sprintInitialTime = time;
+  }
+  
+  get sprintPercentRemaining() {
+    return this._sprintTime / this._sprintInitialTime;
   }
   
   get score() {
     return this._score;
+  }
+  
+  get numberOfFiles() {
+    return this._numFiles;
   }
   
   get diskUsage() {
@@ -39,7 +58,7 @@ boxy.PlayerState = class {
     if (!this.sprintReady) {
       this._sprintCooldown -= boxy.game.tick.delta;
       if (this._sprintCooldown < 0) {
-        console.log("Sprint is ready!");
+        boxy.game.eventHandler.sprintEvent("ready");
         this._sprintCooldown = 0;
       }
     }
@@ -47,14 +66,14 @@ boxy.PlayerState = class {
     if (this.isSprinting) {
       this._sprintTime -= boxy.game.tick.delta;
       if (this._sprintTime <= 0) {
-        boxy.game.eventHandler.sprintEnd();
+        boxy.game.eventHandler.sprintEvent("end");
       }
     }
   }
 
   adjustStats(stats, subtract) {
     if (boxy.isString(stats)) {
-      stats = boxy.game.settings.collectibles[stats];
+      stats = boxy.STAT_VALUES[stats];
     }
     
     if (stats.score) {
@@ -66,5 +85,12 @@ boxy.PlayerState = class {
     if (stats.capacity) {
       this._diskCapacity += (subtract? -1 : 1) * stats.capacity;
     }
+    if (stats.files) {
+      this._numFiles += (subtract? -1 : 1) * stats.files;
+    }
+  }
+  
+  addToScore(value) {
+    this._score += value;
   }
 }

@@ -1,5 +1,6 @@
 boxy.EventHandler = class {
   constructor() {
+    this._eventTracker = new boxy.EventTracker();
   }
   
   set levelState(levelState) {
@@ -25,19 +26,27 @@ boxy.EventHandler = class {
   set gameHud(gameHud) {
     this._gameHud = gameHud;
   }
+  
+  set spriteFactory(spriteFactory) {
+    this._spriteFactory = spriteFactory;
+  }
+  
+  set gameMode(mode) {
+    this._gameMode = mode;
+  }
 
   collisionEvent(data) {
     var collider = data.collider;
     var collidee = data.collidee;
 
-    if (collider === boxy.game.playerEntity) {
+    if (collider === this._playerState.playerEntity) {
       if (collidee instanceof boxy.CollectibleEntity) {
         this._collidePlayerAndCollectible(collider, collidee);
       }
     } else if (collider instanceof boxy.GhostEntity) {
       if (collidee instanceof boxy.GhostEntity) {
         this._collideGhostAndGhost(collider, collidee);
-      } else if (collidee === boxy.game.playerEntity) {
+      } else if (collidee === this._playerState.playerEntity) {
         this._collideGhostAndPlayer(collider, collidee);
       }
     }
@@ -49,7 +58,12 @@ boxy.EventHandler = class {
     case "folder" :
       this._entityManager.destroy(collidee);
       this._levelState.addToCollection(collidee);
-      this._playerState.adjustStats("folder");
+      var key = "folder";
+      if (collidee.format) {
+        key += "_" + collidee.format
+      }
+      this._playerState.adjustStats(key);
+      this._eventTracker.incrementCollected("folder");
       this._collectiblesManager.consume(collidee);
       break;
     case "collection" :
@@ -61,6 +75,7 @@ boxy.EventHandler = class {
     case "disk" :
       this._entityManager.destroy(collidee);
       this._playerState.adjustStats("disk");
+      this._eventTracker.incrementCollected("disk");
       this._collectiblesManager.consume(collidee);
       break;
     }
@@ -90,6 +105,7 @@ boxy.EventHandler = class {
     if (this._playerState.isSprinting) {
       ghost.eatenFor(boxy.GHOST_EATEN_TIME);
       this._playerState.adjustStats("ghost");
+      this._eventTracker.incrementGhostsEaten();
       return;
     }
     
@@ -112,26 +128,31 @@ boxy.EventHandler = class {
     player.blinkTime = difficulty.invincibleDuration;
     player.freezeTime = difficulty.freezeDuration;
     
+    this._eventTracker.incrementGhostHits();
+    this._eventTracker.incrementItemsLost(ejected.length);
+    
     console.log("Boxy lost the following items", ejected);
+  }
+  
+  sprintEvent(state) {
+    if (state == "start") {
+      console.log("Boxy sprint!");
+      this._playerState.sprintTime = boxy.SPRINT_DURATION;
+      this._playerState.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
+      this._eventTracker.incrementSprints();
+    } else if (state == "end") {
+      console.log("Sprint over, boxy can relax");
+      this._playerState.sprintTime = 0;
+      this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
+      this._playerState.playerEntity.resetSpeed();
+    }
+    this._gameHud.changeSprintState(state);
   }
   
   sprintRequested() {
     if (this._playerState.sprintReady) {
-      this.sprintStart();
+      this.sprintEvent("start");
     }
-  }
-  
-  sprintStart() {
-    console.log("Boxy sprint!");
-    this._playerState.sprintTime = boxy.SPRINT_DURATION;
-    boxy.game.playerEntity.boostSpeed(boxy.SPRINT_SPEED_MULTIPLIER);
-  }
-  
-  sprintEnd() {
-    console.log("Sprint over, boxy can relax");
-    this._playerState.sprintTime = 0;
-    this._playerState.sprintCooldown = boxy.SPRINT_COOLDOWN;
-    boxy.game.playerEntity.resetSpeed();
   }
   
   collectionRegistered(data) {
@@ -145,7 +166,7 @@ boxy.EventHandler = class {
     this._gameHud.addCollectionProgress(data);
   }
   
-  collectionCompleted(data) {
+  collectionRemoved(data, completed) {
     var colors = this._levelState.activeColors;
     var index = colors.indexOf(data.color);
     colors.splice(index, 1);
@@ -154,5 +175,35 @@ boxy.EventHandler = class {
     
     var folders = this._entityManager.getCollectiblesByType("folder");
     this._collectiblesManager.randomizeFolderColors(folders);
+    
+    this._gameHud.removeCollectionProgress(data);
+    
+    if (completed && this._levelState.hasReachedGoal()) {
+      this.levelComplete();
+    }
+  }
+  
+  startLevel() {
+    this._gameMode.unpause();
+    this._levelState.startTimer();
+  }
+  
+  levelComplete() {
+    var self = this;
+    
+    this._levelState.endTimer();
+    this._gameMode.pause();
+    this._playerState.playerEntity.changeAnimation("move_down");
+    var containers = this._spriteFactory.containers;
+    createjs.Tween.get(containers.ghosts).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.collectibles).wait(300).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.mapTiles).wait(500).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.text).wait(500).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4));
+    createjs.Tween.get(containers.boxy).wait(1700).to({ alpha : 0}, 1000, createjs.Ease.getPowInOut(4))
+      .call(function() {
+        boxy.game.switchToSummaryMode(self._playerState, self._levelState, self._eventTracker);
+      });
+    console.log("YOU ARE WINNER!");
+    
   }
 }

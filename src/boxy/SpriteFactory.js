@@ -2,13 +2,33 @@ boxy.SpriteFactory = class {
   constructor(loader, stage) {
     this._loader = loader;
     this._stage = stage;
+    this._spritesheetsInitialized = false;
   }
 
   init() {
     this._generateSpritesheets();
+    this.addContainers();
+  }
+  
+  // Removes all displayed elements, except for the background
+  resetAll() {
+    this._mapTilesContainer.removeAllChildren();
+    this._mapTilesContainer.alpha = 1;
+    this._textContainer.removeAllChildren();
+    this._textContainer.alpha = 1;
+    this._collectiblesContainer.removeAllChildren();
+    this._collectiblesContainer.alpha = 1;
+    this._ghostContainer.removeAllChildren();
+    this._ghostContainer.alpha = 1;
+    this._boxyContainer.removeAllChildren();
+    this._boxyContainer.alpha = 1;
   }
 
   _generateSpritesheets() {
+    if (this._spritesheetsInitialized) {
+      return;
+    }
+    
     this._boxySheet = new createjs.SpriteSheet({
         framerate: 6,
         "images": [this._loader.getResult("boxy_sprite")],
@@ -38,7 +58,6 @@ boxy.SpriteFactory = class {
           }
         }
       });
-    this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
     
     this._ghostSheet = new createjs.SpriteSheet({
         framerate: 2,
@@ -73,14 +92,12 @@ boxy.SpriteFactory = class {
           "mol_eaten": 19
         }
       });
-    this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
 
     this._mapTilesSheet = new createjs.SpriteSheet({
         framerate: 0,
         "images": [this._loader.getResult("map_sprite")],
         "frames": {"regX": 0, "height": boxy.game.settings.grid_size, "count": 16, "regY": 0, "width": boxy.game.settings.grid_size}
       });
-    this._mapTilesContainer = new createjs.SpriteContainer(this._mapTilesSheet);
 
     this._collectiblesSheet = new createjs.SpriteSheet({
         framerate: 0,
@@ -116,6 +133,15 @@ boxy.SpriteFactory = class {
           "disk": 26
         }
       });
+  }
+  
+  addContainers() {
+    this._boxyContainer = new createjs.SpriteContainer(this._boxySheet);
+    
+    this._ghostContainer = new createjs.SpriteContainer(this._ghostSheet);
+    
+    this._mapTilesContainer = new createjs.SpriteContainer(this._mapTilesSheet);
+    
     this._collectiblesContainer = new createjs.SpriteContainer(this._collectiblesSheet);
 
     this._textContainer = new createjs.Container();
@@ -125,6 +151,17 @@ boxy.SpriteFactory = class {
     // Add containers to the stage in render order
     this._stage.addChild(this._backgroundContainer, this._mapTilesContainer, this._textContainer,
       this._collectiblesContainer, this._ghostContainer, this._boxyContainer);
+  }
+  
+  get containers() {
+    return {
+      background : this._backgroundContainer,
+      mapTiles : this._mapTilesContainer,
+      text : this._textContainer,
+      collectibles : this._collectiblesContainer,
+      ghosts : this._ghostContainer,
+      boxy : this._boxyContainer
+    };
   }
   
   createBackground(xy, wh, color) {
@@ -176,8 +213,8 @@ boxy.SpriteFactory = class {
     return sprite;
   }
 
-  createText(value) {
-    var text = new createjs.Text(value, "48px silkscreen", "#FFFFFF");
+  createText(value, color = "#FFFFFF", size = 48) {
+    var text = new createjs.Text(value, size + "px silkscreen", color);
     text.textBaseline = "alphabetic";
     this._textContainer.addChild(text);
     return text;

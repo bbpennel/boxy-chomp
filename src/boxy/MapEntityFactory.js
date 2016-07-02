@@ -21,7 +21,7 @@ boxy.MapEntityFactory = class {
   addBoxy(rc, speed) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createBoxySprite(xy);
-    var entity = new boxy.MobileEntity(rc, speed, sprite);
+    var entity = new boxy.MobileEntity(rc, speed, sprite, null, this._stageMap);
     this._entityManager.register(entity);
     entity.collisionRadiusRatio = 0.9;
     return entity;
@@ -30,7 +30,7 @@ boxy.MapEntityFactory = class {
   addFolder(rc, color) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createFolderSprite(xy, color);
-    var entity = new boxy.CollectibleEntity(rc, "folder", null, color, sprite);
+    var entity = new boxy.CollectibleEntity(rc, "folder", null, color, sprite, this._stageMap);
     entity.collisionRadiusRatio = 0.1;
     this._entityManager.register(entity);
     return entity;
@@ -39,7 +39,7 @@ boxy.MapEntityFactory = class {
   addCollection(rc, format, color) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createCollectionSprite(xy, format, color);
-    var entity = new boxy.CollectibleEntity(rc, "collection", format, color, sprite);
+    var entity = new boxy.CollectibleEntity(rc, "collection", format, color, sprite, this._stageMap);
     entity.collisionRadiusRatio = 0.6;
     this._entityManager.register(entity);
     return entity;
@@ -48,7 +48,7 @@ boxy.MapEntityFactory = class {
   addDisk(rc) {
     var xy = this._stageMap.gridToCoordinate(rc);
     var sprite = this._spriteFactory.createDiskSprite(xy);
-    var entity = new boxy.CollectibleEntity(rc, "disk", null, null, sprite);
+    var entity = new boxy.CollectibleEntity(rc, "disk", null, null, sprite, this._stageMap);
     entity.collisionRadiusRatio = 0.7;
     this._entityManager.register(entity);
     return entity;
@@ -76,7 +76,7 @@ boxy.MapEntityFactory = class {
     if (ghostIdentity == 0) {
       prefix = "i_";
     }
-    var entity = new boxy.GhostEntity(rc, speed, sprite, prefix);
+    var entity = new boxy.GhostEntity(rc, speed, sprite, prefix, this._stageMap);
     this._entityManager.register(entity);
     entity.collisionRadiusRatio = 0.9;
     return entity;

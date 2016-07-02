@@ -1,6 +1,6 @@
 boxy.GhostEntity = class extends boxy.MobileEntity {
-  constructor(rc, speed, sprite, spritePrefix) {
-    super(rc, speed, sprite, spritePrefix);
+  constructor(rc, speed, sprite, spritePrefix, stageMap) {
+    super(rc, speed, sprite, spritePrefix, stageMap);
     this._eatenTime = 0;
   }
   
@@ -22,7 +22,7 @@ boxy.GhostEntity = class extends boxy.MobileEntity {
       return this._nextDirection;
     }
 
-    var dirs = boxy.game.stageMap.allowedDirections(this._rc);
+    var dirs = this._stageMap.allowedDirections(this._rc);
 
     if (this._currentDirection == null) {
       var randomDir = Math.floor(Math.random() * dirs.length);

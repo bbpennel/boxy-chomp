@@ -1,6 +1,6 @@
 boxy.MobileEntity = class extends boxy.MapEntity {
-  constructor(rc, speed, sprite, spritePrefix) {
-    super(rc, sprite);
+  constructor(rc, speed, sprite, spritePrefix, stageMap) {
+    super(rc, sprite, stageMap);
     this._speed = speed;
     this._computedSpeed = speed;
     this._stopTimer = 0;
@@ -79,6 +79,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
   
   changeAnimation(animation) {
     this._sprite.gotoAndPlay(this._spritePrefix + animation);
+    return this;
   }
 
   update() {
@@ -145,19 +146,19 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       switch (this.currentDirection) {
         case 0:
           newY -= speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
+          newGrid = this._stageMap.coordinateToGrid([newX, newY]);
           break;
         case 1:
           newX += speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
+          newGrid = this._stageMap.coordinateToGrid([newX + boxy.game.settings.grid_size, newY]);
           break;
         case 2:
           newY += speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
+          newGrid = this._stageMap.coordinateToGrid([newX, newY + boxy.game.settings.grid_size]);
           break;
         case 3:
           newX -= speed;
-          newGrid = boxy.game.stageMap.coordinateToGrid([newX, newY]);
+          newGrid = this._stageMap.coordinateToGrid([newX, newY]);
           break;
       }
 
@@ -168,7 +169,7 @@ boxy.MobileEntity = class extends boxy.MapEntity {
       // Retrieve or compute the next direction if one is provided
       var nextDirection = this.nextDirection;
 
-      var dirs = boxy.game.stageMap.allowedDirections(this._rc);
+      var dirs = this._stageMap.allowedDirections(this._rc);
       if (nextDirection != null) {
         // make sure that the selected direction is allowed
         if (dirs.indexOf(nextDirection) != -1) {

@@ -1,13 +1,14 @@
 boxy.MapEntity = class {
-  constructor(rc, sprite) {
+  constructor(rc, sprite, stageMap) {
     this._rc = [rc[0], rc[1]];
-    this._snapToGrid();
     this._sprite = sprite;
     this.collisionRadiusRatio = 0.5;
     this._invincibleTime = 0;
     this._blinkVisible = true;
     this._blinkTime = 0;
     this._blinkCycle = 0;
+    this._stageMap = stageMap;
+    this._snapToGrid();
   }
 
   set id(id) {
@@ -83,7 +84,7 @@ boxy.MapEntity = class {
   }
 
   _snapToGrid() {
-    this._xy = boxy.game.stageMap.gridToCoordinate(this._rc);
+    this._xy = this._stageMap.gridToCoordinate(this._rc);
   }
 
   _addToGame() {
