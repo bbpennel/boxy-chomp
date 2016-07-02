@@ -70,7 +70,10 @@ boxy.GameMode = class {
     this._gameHud.playerState = this._playerState;
     this._gameHud.levelState = this._levelState;
     this._gameHud.wh = mapDimensions;
+    console.log("dims", mapDimensions);
     this._gameHud.draw();
+    
+    boxy.game.dimensions = mapDimensions;
     
     // Setup game objects
     // Initialize mobile game objects

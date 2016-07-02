@@ -68,6 +68,8 @@ boxy.game = (function () {
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
+    
+    boxy.game.eventHandler.startLevel();
   }
 
   function tick(event) {

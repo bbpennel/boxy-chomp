@@ -1,6 +1,8 @@
 boxy.PlayerState = class {
   constructor(startingCapacity) {
     this._score = 0;
+    this._numFiles = 0;
+    this._files = 0;
     this._diskUsage = 0;
     this._diskCapacity = startingCapacity;
     this._sprintCooldown = 0;
@@ -38,6 +40,10 @@ boxy.PlayerState = class {
   
   get score() {
     return this._score;
+  }
+  
+  get numberOfFiles() {
+    return this._numFiles;
   }
   
   get diskUsage() {
@@ -79,5 +85,12 @@ boxy.PlayerState = class {
     if (stats.capacity) {
       this._diskCapacity += (subtract? -1 : 1) * stats.capacity;
     }
+    if (stats.files) {
+      this._numFiles += (subtract? -1 : 1) * stats.files;
+    }
+  }
+  
+  addToScore(value) {
+    this._score += value;
   }
 }

@@ -7,7 +7,7 @@ boxy.LevelState = class {
     this._collections = [];
     this._difficultyLevel = difficultyLevel;
     this._stageNumber = stageNumber;
-    this._stageLevel = boxy.STAGE_LEVELS[this._stageNumber];
+    this._levelSettings = boxy.STAGE_LEVELS[this._stageNumber];
     this._activeColors = ["plain"];
   }
   
@@ -26,7 +26,7 @@ boxy.LevelState = class {
         color : collection.color,
         collObj : collection,
         progress : 0,
-        goal : this._stageLevel.itemsPerCollection[collection.format]
+        goal : this._levelSettings.itemsPerCollection[collection.format]
       };
       
       this._collections.push(collEntry);
@@ -84,6 +84,21 @@ boxy.LevelState = class {
     return -1;
   }
   
+  startTimer() {
+    this._levelTimer = new Date().getTime();
+  }
+  
+  endTimer() {
+    this._levelTimerEnd = new Date().getTime();
+  }
+  
+  get levelTime() {
+    if (this._levelTimerEnd) {
+      return this._levelTimerEnd - this._levelTimer;
+    }
+    return new Date().getTime() - this._levelTimer;
+  }
+  
   get collectionProgress() {
     return this._collections;
   }
@@ -101,10 +116,26 @@ boxy.LevelState = class {
   }
   
   get collectionGoal() {
-    return this._stageLevel.collectionGoal;
+    return this._levelSettings.collectionGoal;
   }
   
   hasReachedGoal() {
-    return this._completedCollections.length >= this._stageLevel.collectionGoal;
+    return this._completedCollections.length >= this._levelSettings.collectionGoal;
+  }
+  
+  getTimeScore(timeSeconds) {
+    var fromPar = this._levelSettings.timePar - timeSeconds;
+    if (fromPar <= 0) {
+      return 0;
+    }
+    return Math.floor((fromPar / this._levelSettings.timePar) * this._levelSettings.timeMaxScore);
+  }
+  
+  getSprintScore(sprintCount) {
+    var fromPar = this._levelSettings.sprintPar - sprintCount;
+    if (fromPar <= 0) {
+      return 0;
+    }
+    return Math.floor((fromPar / this._levelSettings.sprintPar) * this._levelSettings.sprintMaxScore);
   }
 }

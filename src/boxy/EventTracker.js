@@ -4,7 +4,7 @@ boxy.EventTracker = class {
     this._ghostHits = 0;
     this._ghostsEaten = 0;
     this._sprintCount = 0;
-    
+    this._itemsLost = 0;
   }
   
   incrementCollected(collType) {
@@ -33,6 +33,14 @@ boxy.EventTracker = class {
   
   get ghostHits() {
     return this._ghostHits;
+  }
+  
+  incrementItemsLost(number) {
+    this._itemsLost += number;
+  }
+  
+  get itemsLost() {
+    return this._itemsLost;
   }
   
   incrementGhostsEaten() {

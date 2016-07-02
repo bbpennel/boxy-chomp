@@ -129,6 +129,7 @@ boxy.EventHandler = class {
     player.freezeTime = difficulty.freezeDuration;
     
     this._eventTracker.incrementGhostHits();
+    this._eventTracker.incrementItemsLost(ejected.length);
     
     console.log("Boxy lost the following items", ejected);
   }
@@ -182,9 +183,15 @@ boxy.EventHandler = class {
     }
   }
   
+  startLevel() {
+    this._gameMode.unpause();
+    this._levelState.startTimer();
+  }
+  
   levelComplete() {
     var self = this;
     
+    this._levelState.endTimer();
     this._gameMode.pause();
     this._playerState.playerEntity.changeAnimation("move_down");
     var containers = this._spriteFactory.containers;

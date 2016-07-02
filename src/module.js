@@ -31,23 +31,28 @@ boxy.COLLECTIBLE_TYPES = {
 boxy.STAT_VALUES = {
   folder : {
     score : 5,
-    disk : 1
+    disk : 1,
+    files : 10
   },
   folder_text : {
     score : 5,
-    disk : 50
+    disk : 50,
+    files : 50
   },
   folder_image : {
     score : 40,
-    disk : 500
+    disk : 500,
+    files : 30
   },
   folder_audio : {
     score : 100,
-    disk : 4000
+    disk : 4000,
+    files : 10
   },
   folder_data : {
     score: 250,
-    disk : 15000
+    disk : 15000,
+    files : 3
   },
   collection : {
     score : 100,
@@ -55,7 +60,6 @@ boxy.STAT_VALUES = {
   },
   disk : {
     score : 100,
-    disk : 0,
     capacity : 10000
   },
   ghost : {
@@ -90,8 +94,10 @@ boxy.STAGE_LEVELS = [
       audio : 5,
       data : 3
     },
-    sprintsPar : 10,
-    timePar : 90
+    sprintPar : 10,
+    sprintMaxScore : 1000,
+    timePar : 90,
+    timeMaxScore : 1000
   },
   {
     collectionGoal : 3,
@@ -133,4 +139,4 @@ boxy.KEYCODE_SPACE = 32;
 
 boxy.FILE_SIZE_SUFFIXES = ['mb', 'gb', 'tb', 'pb'];
 
-boxy.SCORE_DISK_USAGE_MULTIPLIER = 0.001;
+boxy.SCORE_DISK_USAGE_MULTIPLIER = 0.02;

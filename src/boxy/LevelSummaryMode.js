@@ -5,9 +5,9 @@ boxy.LevelSummaryMode = class {
     this._currentLine = 0;
     this._lineHeight = 60;
     this._currentLineX = 0;
-    this._labelColor = "#CCEEFF";
+    this._labelColor = "#BBE0F0";
     this._scoreColor = "#BBFFBB";
-    this._labelOffsetX = 360;
+    this._labelOffsetX = 300;
     this._entities = [];
   }
   
@@ -41,16 +41,43 @@ boxy.LevelSummaryMode = class {
     
     var diskCapacity = boxy.formatDiskUsage(this._playerState.diskCapacity);
     
+    var levelTime = Math.floor(this._levelState.levelTime / 1000);
+    var timeMinutes = Math.floor(levelTime / 60);
+    var timeSeconds = levelTime % 60;
+    if (timeSeconds < 10) {
+      timeSeconds = "0" + timeSeconds;
+    }
+    
+    var timeScore = this._levelState.getTimeScore(levelTime);
+    var sprintScore = this._levelState.getSprintScore(this._eventTracker.sprintCount);
+    
+    // Modify score for post game bonuses
+    var levelScore = this._playerState.score;
+    var bonuses = timeScore + sprintScore + diskScore;
+    this._playerState.addToScore(bonuses);
+    
     this.newLine()
       .text("Level Complete!", "#FFCF40", "66").newLine()
-      .label("Time").text("0:00").scoreIncrease(5).newLine()
-      .label("Sprints").text(this._eventTracker.sprintCount).scoreIncrease(5).newLine()
-      .label("Disk Usage").text("+" + diskUsage).scoreIncrease(diskScore).newLine()
-      .label("Disk Capacity").text("+" + diskCapacity).newLine()
-      .label("Collections")
+      .label("Time").text(timeMinutes + ":" + timeSeconds).scoreIncrease(timeScore).newLine()
+      .label("Sprints").text(this._eventTracker.sprintCount).scoreIncrease(sprintScore).newLine()
+      .label("Disk").text(diskUsage + " / " + diskCapacity).scoreIncrease(diskScore).newLine()
+      .label("Files").text(this._playerState.numberOfFiles).newLine()
+      .label("Completed")
       .renderCollectionFormats(this._summarizeCollections(this._levelState.completedCollections)).newLine()
-      .label("Folders").text(this._eventTracker.collectedCounts.folder).newLine();
+      .label("Danger").text("Hit " + this._eventTracker.ghostHits + " times (" 
+        + this._eventTracker.itemsLost + " items lost)").newLine()
+      .text("-----------------------------", "#FFCF40").newLine()
+      .label("Score").text(levelScore).scoreIncrease(bonuses).text(" = ").text(this._playerState.score).newLine();
+    
+    this._continuePrompts();
     return this;
+  }
+  
+  _continuePrompts() {
+    var text = this._spriteFactory.createText("Space to continue, Q to quit", "#FFCF40");
+    text.x = boxy.game.dimensions[0] - 10;
+    text.y = boxy.game.dimensions[1] - 30;
+    text.textAlign = "right";
   }
   
   get _lineOffset() {
@@ -58,7 +85,7 @@ boxy.LevelSummaryMode = class {
   }
   
   label(label) {
-    var labelText = this._spriteFactory.createText(label + ":", null, 38);
+    var labelText = this._spriteFactory.createText(label, null, 38);
     labelText.x = this._labelOffsetX;
     labelText.y = this._lineOffset;
     labelText.color = this._labelColor;
@@ -78,6 +105,9 @@ boxy.LevelSummaryMode = class {
   }
   
   scoreIncrease(value) {
+    if (value == 0) {
+      return this;
+    }
     this._currentLineX += 20;
     this.text("+" + value, this._scoreColor);
     return this;
