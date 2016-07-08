@@ -14,6 +14,7 @@ boxy.game = (function () {
 
   var spriteFactory;
   var mapsData, levelsData;
+  var levelNumber;
   
   var mode;
 
@@ -57,12 +58,8 @@ boxy.game = (function () {
     mode.init().draw();
   };
 
-  function handleComplete(event) {
-    mapsData = loader.getResult("mapsData");
-    levelsData = loader.getResult("levelsData");
-    
-    spriteFactory = new boxy.SpriteFactory(loader, stage);
-    spriteFactory.init();
+  game.switchToGameMode = function(levelNumber) {
+    spriteFactory.resetAll();
     
     mode = new boxy.GameMode(game.settings);
     mode.spriteFactory = spriteFactory;
@@ -70,14 +67,26 @@ boxy.game = (function () {
     mode.loader = loader;
     mode.mapsData = mapsData;
     mode.levelsData = levelsData;
-    mode.levelNumber = 0;
+    mode.levelNumber = levelNumber;
     
     mode.init();
+
+    boxy.game.eventHandler.startLevel();
+  }
+
+  function handleComplete(event) {
+    levelNumber = 0;
+
+    mapsData = loader.getResult("mapsData");
+    levelsData = loader.getResult("levelsData");
+    
+    spriteFactory = new boxy.SpriteFactory(loader, stage);
+    spriteFactory.init();
 
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.addEventListener("tick", tick);
     
-    boxy.game.eventHandler.startLevel();
+    game.switchToGameMode(levelNumber);
   }
 
   function tick(event) {

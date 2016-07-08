@@ -19,6 +19,10 @@ boxy.LevelState = class {
   get spawnInfo() {
     return this._spawnInfo;
   }
+
+  get stageNumber() {
+    return this._stageNumber;
+  }
   
   registerCollection(collection) {
     if (this._collections.length < this._collectionLimit) {

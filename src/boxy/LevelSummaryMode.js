@@ -160,6 +160,13 @@ boxy.LevelSummaryMode = class {
   }
   
   handleKeyDown(e) {
-    
+    if (!e) {
+      var e = window.event;
+    }
+    switch (e.keyCode) {
+      case boxy.KEYCODE_SPACE:
+        boxy.game.eventHandler.goToNextLevel();
+        return false;
+    }
   }
 }
