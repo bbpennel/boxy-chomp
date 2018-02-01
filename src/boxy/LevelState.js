@@ -1,18 +1,27 @@
 // Tracks progress on the current level
 boxy.LevelState = class {
-  constructor(stageNumber, difficultyLevel) {
+  constructor(levelSettings, stageNumber, difficultyLevel) {
     this._collectionLimit = 2;
     this._completedCollections = [];
     // Active collections
     this._collections = [];
     this._difficultyLevel = difficultyLevel;
     this._stageNumber = stageNumber;
-    this._levelSettings = boxy.STAGE_LEVELS[this._stageNumber];
+    this._levelSettings = levelSettings;
+    this._spawnInfo = this._levelSettings.spawnInfo;
     this._activeColors = ["plain"];
   }
   
   get difficultyLevel() {
     return this._difficultyLevel;
+  }
+
+  get spawnInfo() {
+    return this._spawnInfo;
+  }
+
+  get stageNumber() {
+    return this._stageNumber;
   }
   
   registerCollection(collection) {

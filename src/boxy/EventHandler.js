@@ -204,6 +204,9 @@ boxy.EventHandler = class {
         boxy.game.switchToSummaryMode(self._playerState, self._levelState, self._eventTracker);
       });
     console.log("YOU ARE WINNER!");
-    
+  }
+
+  goToNextLevel() {
+    boxy.game.switchToGameMode(this._levelState.stageNumber + 1);
   }
 }
